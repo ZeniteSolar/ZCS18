@@ -65,7 +65,7 @@ CAN_L
 Text Label 6500 3050 0    60   ~ 0
 CAN_H
 $Comp
-L ZS17-cache:RJ45 J402
+L atmega_can_shield-rescue:RJ45-ZS17-cache J402
 U 1 1 5A01AFBA
 P 7800 3400
 F 0 "J402" H 8000 3900 50  0000 C CNN
@@ -93,7 +93,7 @@ CAN_GND
 Wire Wire Line
 	3100 3350 3450 3350
 $Comp
-L ZS17-cache:RJ45 J401
+L atmega_can_shield-rescue:RJ45-ZS17-cache J401
 U 1 1 5A01AFA3
 P 5900 3400
 F 0 "J401" H 6100 3900 50  0000 C CNN

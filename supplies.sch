@@ -15,7 +15,7 @@ Comment3 ""
 Comment4 ""
 $EndDescr
 $Comp
-L ZS17-cache:LM7805_TO220 U301
+L atmega_can_shield-rescue:LM7805_TO220-ZS17-cache U301
 U 1 1 5A007B62
 P 6750 3350
 F 0 "U301" H 6600 3475 50  0000 C CNN
@@ -31,7 +31,7 @@ GND_IN
 Text HLabel 7500 3150 2    60   Input ~ 0
 +5V_OUT
 $Comp
-L ZS17-cache:CP1_Small C301
+L atmega_can_shield-rescue:CP1_Small-ZS17-cache C301
 U 1 1 5A008895
 P 5600 3800
 F 0 "C301" H 5610 3870 50  0000 L CNN
@@ -44,7 +44,7 @@ F 5 "https://www.mouser.com/ProductDetail/Taiyo-Yuden/UMK316BBJ106ML-T?qs=sGAEpi
 	1    0    0    -1  
 $EndComp
 $Comp
-L ZS17-cache:C_Small C302
+L atmega_can_shield-rescue:C_Small-ZS17-cache C302
 U 1 1 5A00899A
 P 5900 3800
 F 0 "C302" H 5910 3870 50  0000 L CNN
@@ -59,7 +59,7 @@ $EndComp
 Text HLabel 3300 3350 0    60   Input ~ 0
 +18V_IN
 $Comp
-L ZS17-cache:C_Small C303
+L atmega_can_shield-rescue:C_Small-ZS17-cache C303
 U 1 1 5A00B18A
 P 7350 3800
 F 0 "C303" H 7360 3870 50  0000 L CNN
@@ -70,7 +70,7 @@ F 3 "" H 7350 3800 50  0001 C CNN
 	1    0    0    -1  
 $EndComp
 $Comp
-L ZS17-cache:CP1_Small C304
+L atmega_can_shield-rescue:CP1_Small-ZS17-cache C304
 U 1 1 5AAD0D5C
 P 7700 3800
 F 0 "C304" H 7710 3870 50  0000 L CNN
@@ -107,7 +107,7 @@ F 3 "" H 6050 2900 50  0001 C CNN
 	1    0    0    -1  
 $EndComp
 $Comp
-L ZS17-cache:LED_Small_ALT D301
+L atmega_can_shield-rescue:LED_Small_ALT-ZS17-cache D301
 U 1 1 5ADC67AD
 P 8300 3650
 F 0 "D301" H 8250 3775 50  0000 L CNN
@@ -119,7 +119,7 @@ F 4 "https://www.mouser.com/ProductDetail/Kingbright/AP2012EC?qs=sGAEpiMZZMseGfS
 	0    1    -1   0   
 $EndComp
 $Comp
-L ZS17-cache:R_Small R301
+L atmega_can_shield-rescue:R_Small-ZS17-cache R301
 U 1 1 5ADC67B4
 P 8300 3900
 F 0 "R301" H 8330 3920 50  0000 L CNN

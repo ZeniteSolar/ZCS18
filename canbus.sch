@@ -15,7 +15,7 @@ Comment3 ""
 Comment4 ""
 $EndDescr
 $Comp
-L ZS17-cache:MCP2551-I_SN U201
+L atmega_can_shield-rescue:MCP2551-I_SN-ZS17-cache U201
 U 1 1 59FDAEE3
 P 6450 3300
 F 0 "U201" H 6050 3650 50  0000 L CNN
@@ -31,7 +31,7 @@ TXCAN
 Text Label 5250 3100 2    60   ~ 0
 RXCAN
 $Comp
-L ZS17-cache:MCP2515-E_ST-SOIC18 U202
+L atmega_can_shield-rescue:MCP2515-E_ST-SOIC18-ZS17-cache U202
 U 1 1 59FDAF0B
 P 4300 3700
 F 0 "U202" H 4150 4450 50  0000 R CNN
@@ -49,7 +49,7 @@ NoConn ~ 4900 4000
 NoConn ~ 4900 4100
 NoConn ~ 4900 4200
 $Comp
-L ZS17-cache:R_Small R206
+L atmega_can_shield-rescue:R_Small-ZS17-cache R206
 U 1 1 59FDAF39
 P 5100 4300
 F 0 "R206" V 4904 4300 50  0000 C CNN
@@ -60,7 +60,7 @@ F 3 "" H 5100 4300 50  0001 C CNN
 	0    1    1    0   
 $EndComp
 $Comp
-L ZS17-cache:R_Small R203
+L atmega_can_shield-rescue:R_Small-ZS17-cache R203
 U 1 1 59FDAF40
 P 5800 3750
 F 0 "R203" H 5830 3770 50  0000 L CNN
@@ -72,7 +72,7 @@ F 3 "" H 5800 3750 50  0001 C CNN
 $EndComp
 NoConn ~ 5950 3400
 $Comp
-L ZS17-cache:R_Small R201
+L atmega_can_shield-rescue:R_Small-ZS17-cache R201
 U 1 1 59FDAF5C
 P 8850 3600
 F 0 "R201" V 8600 3600 50  0000 C CNN
@@ -101,7 +101,7 @@ CAN_H
 Text HLabel 9800 3400 2    60   BiDi ~ 0
 CAN_L
 $Comp
-L ZS17-cache:C_Small C202
+L atmega_can_shield-rescue:C_Small-ZS17-cache C202
 U 1 1 5AAC0190
 P 4450 2750
 F 0 "C202" V 4221 2750 50  0000 C CNN
@@ -112,7 +112,7 @@ F 3 "" H 4450 2750 50  0001 C CNN
 	0    1    1    0   
 $EndComp
 $Comp
-L ZS17-cache:GND #PWR019
+L atmega_can_shield-rescue:GND-ZS17-cache #PWR019
 U 1 1 5AAC0405
 P 4600 2800
 F 0 "#PWR019" H 4600 2550 50  0001 C CNN
@@ -123,7 +123,7 @@ F 3 "" H 4600 2800 50  0001 C CNN
 	1    0    0    -1  
 $EndComp
 $Comp
-L ZS17-cache:C_Small C203
+L atmega_can_shield-rescue:C_Small-ZS17-cache C203
 U 1 1 5AAC0546
 P 6600 2750
 F 0 "C203" V 6371 2750 50  0000 C CNN
@@ -134,7 +134,7 @@ F 3 "" H 6600 2750 50  0001 C CNN
 	0    1    1    0   
 $EndComp
 $Comp
-L ZS17-cache:GND #PWR020
+L atmega_can_shield-rescue:GND-ZS17-cache #PWR020
 U 1 1 5AAC054E
 P 6750 2800
 F 0 "#PWR020" H 6750 2550 50  0001 C CNN
@@ -192,7 +192,7 @@ F 3 "" H 5750 3250 50  0001 C CNN
 	-1   0    0    1   
 $EndComp
 $Comp
-L ZS17-cache:R_Small R204
+L atmega_can_shield-rescue:R_Small-ZS17-cache R204
 U 1 1 5AAC5A25
 P 8500 3750
 F 0 "R204" H 8442 3796 50  0000 R CNN
@@ -203,7 +203,7 @@ F 3 "" H 8500 3750 50  0001 C CNN
 	1    0    0    -1  
 $EndComp
 $Comp
-L ZS17-cache:R_Small R205
+L atmega_can_shield-rescue:R_Small-ZS17-cache R205
 U 1 1 5AAC5BC6
 P 9600 3750
 F 0 "R205" H 9659 3796 50  0000 L CNN
@@ -214,7 +214,7 @@ F 3 "" H 9600 3750 50  0001 C CNN
 	1    0    0    -1  
 $EndComp
 $Comp
-L ZS17-cache:C_Small C204
+L atmega_can_shield-rescue:C_Small-ZS17-cache C204
 U 1 1 5AAC5D22
 P 8500 4050
 F 0 "C204" H 8591 4004 50  0000 L CNN
@@ -226,7 +226,7 @@ F 4 "https://br.mouser.com/ProductDetail/Yageo/CC0805KRX7R9BB561?qs=sGAEpiMZZMs0
 	-1   0    0    1   
 $EndComp
 $Comp
-L ZS17-cache:GND #PWR021
+L atmega_can_shield-rescue:GND-ZS17-cache #PWR021
 U 1 1 5AAC605D
 P 9050 4250
 F 0 "#PWR021" H 9050 4000 50  0001 C CNN
@@ -261,7 +261,7 @@ $EndComp
 Text Notes 6500 4050 0    39   ~ 0
 (Alt. Parts: \n	TJA1050, \n	TJA1051,\n	MCP2551)
 $Comp
-L ZS17-cache:Crystal_Small Y201
+L atmega_can_shield-rescue:Crystal_Small-ZS17-cache Y201
 U 1 1 5AD9E2C0
 P 2900 4150
 F 0 "Y201" H 2900 3950 50  0000 C CNN
@@ -273,7 +273,7 @@ F 4 "https://www.mouser.com/ProductDetail/IQD/LFXTAL003237Reel?qs=sGAEpiMZZMsBj6
 	-1   0    0    1   
 $EndComp
 $Comp
-L ZS17-cache:C_Small C207
+L atmega_can_shield-rescue:C_Small-ZS17-cache C207
 U 1 1 5AD9E2C7
 P 3150 4350
 F 0 "C207" H 3242 4396 50  0000 L CNN
@@ -284,7 +284,7 @@ F 3 "" H 3150 4350 50  0001 C CNN
 	1    0    0    -1  
 $EndComp
 $Comp
-L ZS17-cache:C_Small C206
+L atmega_can_shield-rescue:C_Small-ZS17-cache C206
 U 1 1 5AD9E2CE
 P 2650 4350
 F 0 "C206" H 2559 4304 50  0000 R CNN
@@ -310,7 +310,7 @@ F 3 "" H 2900 4650 50  0001 C CNN
 	-1   0    0    -1  
 $EndComp
 $Comp
-L ZS17-cache:GND #PWR023
+L atmega_can_shield-rescue:GND-ZS17-cache #PWR023
 U 1 1 5AD9EE4B
 P 2250 5100
 F 0 "#PWR023" H 2250 4850 50  0001 C CNN
@@ -335,7 +335,7 @@ $EndComp
 Text Notes 2450 3850 0    39   ~ 0
 GNDD Guard
 $Comp
-L ZS17-cache:R_Small R202
+L atmega_can_shield-rescue:R_Small-ZS17-cache R202
 U 1 1 5AD8F0BD
 P 5600 3750
 F 0 "R202" H 5630 3770 50  0000 L CNN
@@ -346,7 +346,7 @@ F 3 "" H 5600 3750 50  0001 C CNN
 	-1   0    0    -1  
 $EndComp
 $Comp
-L ZS17-cache:C_Small C201
+L atmega_can_shield-rescue:C_Small-ZS17-cache C201
 U 1 1 5ADA1382
 P 3750 2400
 F 0 "C201" V 3979 2400 50  0000 C CNN
@@ -357,7 +357,7 @@ F 3 "" H 3750 2400 50  0001 C CNN
 	0    -1   -1   0   
 $EndComp
 $Comp
-L ZS17-cache:GND #PWR024
+L atmega_can_shield-rescue:GND-ZS17-cache #PWR024
 U 1 1 5ADA1D4D
 P 3650 2450
 F 0 "#PWR024" H 3650 2200 50  0001 C CNN
@@ -653,7 +653,7 @@ Wire Wire Line
 Wire Wire Line
 	7700 3200 8500 3200
 $Comp
-L ZS17-cache:C_Small C205
+L atmega_can_shield-rescue:C_Small-ZS17-cache C205
 U 1 1 5AAC5E7F
 P 9600 4050
 F 0 "C205" H 9692 4004 50  0000 L CNN

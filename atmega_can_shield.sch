@@ -52,7 +52,7 @@ F4 "CAN_18V" O L 9250 4100 60
 F5 "CAN_GND" B L 9250 4400 60 
 $EndSheet
 $Comp
-L ZS17-cache:+5V #PWR01
+L atmega_can_shield-rescue:+5V-ZS17-cache #PWR01
 U 1 1 5AAE69A2
 P 7500 2300
 F 0 "#PWR01" H 7500 2150 50  0001 C CNN
@@ -63,7 +63,7 @@ F 3 "" H 7500 2300 50  0001 C CNN
 	1    0    0    -1  
 $EndComp
 $Comp
-L ZS17-cache:+5V #PWR02
+L atmega_can_shield-rescue:+5V-ZS17-cache #PWR02
 U 1 1 5AAEB3D5
 P 8600 4050
 F 0 "#PWR02" H 8600 3900 50  0001 C CNN
@@ -74,7 +74,7 @@ F 3 "" H 8600 4050 50  0001 C CNN
 	1    0    0    -1  
 $EndComp
 $Comp
-L ZS17-cache:GND #PWR04
+L atmega_can_shield-rescue:GND-ZS17-cache #PWR04
 U 1 1 5AAEBC33
 P 8600 4500
 F 0 "#PWR04" H 8600 4250 50  0001 C CNN
@@ -85,7 +85,7 @@ F 3 "" H 8600 4500 50  0001 C CNN
 	1    0    0    -1  
 $EndComp
 $Comp
-L ZS17-cache:GND #PWR05
+L atmega_can_shield-rescue:GND-ZS17-cache #PWR05
 U 1 1 5AAEDE49
 P 7500 2650
 F 0 "#PWR05" H 7500 2400 50  0001 C CNN
@@ -107,7 +107,7 @@ F 3 "" H 6100 3800 50  0001 C CNN
 	1    0    0    -1  
 $EndComp
 $Comp
-L ZS17-cache:GND #PWR06
+L atmega_can_shield-rescue:GND-ZS17-cache #PWR06
 U 1 1 5AAF406C
 P 6450 5150
 F 0 "#PWR06" H 6450 4900 50  0001 C CNN
@@ -138,7 +138,7 @@ SCK
 Text Label 5550 5100 0    60   ~ 0
 RESET
 $Comp
-L ZS17-cache:+5V #PWR07
+L atmega_can_shield-rescue:+5V-ZS17-cache #PWR07
 U 1 1 5AAF5ED6
 P 6450 4850
 F 0 "#PWR07" H 6450 4700 50  0001 C CNN
@@ -160,7 +160,7 @@ F 3 "" H 6050 3550 50  0001 C CNN
 	1    0    0    1   
 $EndComp
 $Comp
-L ZS17-cache:GND #PWR08
+L atmega_can_shield-rescue:GND-ZS17-cache #PWR08
 U 1 1 5AAF8CB0
 P 5750 3750
 F 0 "#PWR08" H 5750 3500 50  0001 C CNN
@@ -171,7 +171,7 @@ F 3 "" H 5750 3750 50  0001 C CNN
 	1    0    0    -1  
 $EndComp
 $Comp
-L ZS17-cache:+18V #PWR09
+L atmega_can_shield-rescue:+18V-ZS17-cache #PWR09
 U 1 1 5AB047B0
 P 7300 2300
 F 0 "#PWR09" H 7300 2150 50  0001 C CNN
@@ -182,7 +182,7 @@ F 3 "" H 7300 2300 50  0001 C CNN
 	1    0    0    -1  
 $EndComp
 $Comp
-L ZS17-cache:+5V #PWR010
+L atmega_can_shield-rescue:+5V-ZS17-cache #PWR010
 U 1 1 5AD7DF4A
 P 2950 3900
 F 0 "#PWR010" H 2950 3750 50  0001 C CNN
@@ -193,7 +193,7 @@ F 3 "" H 2950 3900 50  0001 C CNN
 	-1   0    0    -1  
 $EndComp
 $Comp
-L ZS17-cache:GND #PWR011
+L atmega_can_shield-rescue:GND-ZS17-cache #PWR011
 U 1 1 5AD7E063
 P 2950 4300
 F 0 "#PWR011" H 2950 4050 50  0001 C CNN
@@ -251,7 +251,7 @@ $EndSheet
 Text Notes 8500 6300 0    39   ~ 0
 ESD Protection Layout Guide:\n	http://www.ti.com/lit/an/slva680/slva680.pdf\n
 $Comp
-L ZS17-cache:R_Small R101
+L atmega_can_shield-rescue:R_Small-ZS17-cache R101
 U 1 1 5ADC5B78
 P 5000 4100
 F 0 "R101" V 5050 4200 50  0000 L CNN
@@ -262,7 +262,7 @@ F 3 "" H 5000 4100 50  0001 C CNN
 	0    1    -1   0   
 $EndComp
 $Comp
-L ZS17-cache:R_Small R102
+L atmega_can_shield-rescue:R_Small-ZS17-cache R102
 U 1 1 5ADC6840
 P 5000 4200
 F 0 "R102" V 5050 4300 50  0000 L CNN
@@ -273,7 +273,7 @@ F 3 "" H 5000 4200 50  0001 C CNN
 	0    1    -1   0   
 $EndComp
 $Comp
-L ZS17-cache:R_Small R103
+L atmega_can_shield-rescue:R_Small-ZS17-cache R103
 U 1 1 5ADC6970
 P 5000 4300
 F 0 "R103" V 5050 4400 50  0000 L CNN
@@ -295,7 +295,7 @@ F 3 "" H 5000 5350 50  0001 C CNN
 	1    0    0    1   
 $EndComp
 $Comp
-L ZS17-cache:C_Small C104
+L atmega_can_shield-rescue:C_Small-ZS17-cache C104
 U 1 1 5ADCCD3E
 P 2100 2800
 F 0 "C104" H 2110 2870 50  0000 L CNN
@@ -308,7 +308,7 @@ F 5 ">25V" H 2250 2800 39  0000 C CNN "Voltage"
 	1    0    0    -1  
 $EndComp
 $Comp
-L ZS17-cache:+5V #PWR012
+L atmega_can_shield-rescue:+5V-ZS17-cache #PWR012
 U 1 1 5ADCCD50
 P 2000 2550
 F 0 "#PWR012" H 2000 2400 50  0001 C CNN
@@ -319,7 +319,7 @@ F 3 "" H 2000 2550 50  0001 C CNN
 	1    0    0    -1  
 $EndComp
 $Comp
-L ZS17-cache:GND #PWR013
+L atmega_can_shield-rescue:GND-ZS17-cache #PWR013
 U 1 1 5ADCCD56
 P 2000 3050
 F 0 "#PWR013" H 2000 2800 50  0001 C CNN
@@ -330,7 +330,7 @@ F 3 "" H 2000 3050 50  0001 C CNN
 	1    0    0    -1  
 $EndComp
 $Comp
-L ZS17-cache:C_Small C102
+L atmega_can_shield-rescue:C_Small-ZS17-cache C102
 U 1 1 5ADD3404
 P 2100 1700
 F 0 "C102" H 2110 1770 50  0000 L CNN
@@ -343,7 +343,7 @@ F 5 ">25V" H 2250 1700 39  0000 C CNN "Voltage"
 	1    0    0    -1  
 $EndComp
 $Comp
-L ZS17-cache:GND #PWR014
+L atmega_can_shield-rescue:GND-ZS17-cache #PWR014
 U 1 1 5ADD341C
 P 2000 1950
 F 0 "#PWR014" H 2000 1700 50  0001 C CNN
@@ -354,7 +354,7 @@ F 3 "" H 2000 1950 50  0001 C CNN
 	1    0    0    -1  
 $EndComp
 $Comp
-L ZS17-cache:+18V #PWR015
+L atmega_can_shield-rescue:+18V-ZS17-cache #PWR015
 U 1 1 5ADD3590
 P 2000 1450
 F 0 "#PWR015" H 2000 1300 50  0001 C CNN
@@ -408,7 +408,7 @@ F 3 "" H 5000 6150 50  0001 C CNN
 	1    0    0    1   
 $EndComp
 $Comp
-L ZS17-cache:R_Small R104
+L atmega_can_shield-rescue:R_Small-ZS17-cache R104
 U 1 1 5ADD74EF
 P 5000 4400
 F 0 "R104" V 5050 4500 50  0000 L CNN
@@ -419,7 +419,7 @@ F 3 "" H 5000 4400 50  0001 C CNN
 	0    1    -1   0   
 $EndComp
 $Comp
-L ZS17-cache:R_Small R105
+L atmega_can_shield-rescue:R_Small-ZS17-cache R105
 U 1 1 5ADD77B4
 P 5000 4500
 F 0 "R105" V 5050 4600 50  0000 L CNN
@@ -454,7 +454,7 @@ $EndComp
 Text Notes 2150 4650 0    39   ~ 0
 GNDA Guard
 $Comp
-L ZS17-cache:GND #PWR017
+L atmega_can_shield-rescue:GND-ZS17-cache #PWR017
 U 1 1 5AE317DE
 P 4400 7200
 F 0 "#PWR017" H 4400 6950 50  0001 C CNN
@@ -476,7 +476,7 @@ F 3 "" H 7300 2650 50  0001 C CNN
 	1    0    0    -1  
 $EndComp
 $Comp
-L ZS17-cache:C_Small C101
+L atmega_can_shield-rescue:C_Small-ZS17-cache C101
 U 1 1 5AEE47F6
 P 1900 1700
 F 0 "C101" H 1700 1800 50  0000 L CNN
@@ -489,7 +489,7 @@ F 5 "https://www.mouser.com/ProductDetail/Yageo/CC0805MKX5R8BB105?qs=sGAEpiMZZMu
 	1    0    0    1   
 $EndComp
 $Comp
-L ZS17-cache:C_Small C103
+L atmega_can_shield-rescue:C_Small-ZS17-cache C103
 U 1 1 5AEE48D3
 P 1900 2800
 F 0 "C103" H 1700 2900 50  0000 L CNN
