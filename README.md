@@ -5,7 +5,7 @@ The piece of hardware used in almost all modules in the boat of Zênite Solar Te
 
 ![zenite_logo] 
 
-[Zênite Solar TEAM](https://github.com/ZeniteSolar) is an universitary project from [IFSC](www.ifsc.edu.br) focused on the development of a high performance solar boat for races and it aims to be completly open source.
+[Zênite Solar TEAM](https://github.com/ZeniteSolar) is an universitary project from [IFSC](http://www.ifsc.edu.br) focused on the development of a high performance solar boat for races and it aims to be completly open source.
 
 - All the hardware was developed using [KiCad](http://kicad-pcb.org/);
 - Simulations was done using [LTSpice](http://www.analog.com/en/design-center/design-tools-and-calculators/ltspice-simulator.html);
