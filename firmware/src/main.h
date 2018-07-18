@@ -24,6 +24,7 @@
 
 #ifdef USART_ON
 #include "usart.h"
+#pragma message("USART: ON!")
 #else
 #pragma message("USART: OFF!")
 #endif /*ifdef USART_ON*/
@@ -31,36 +32,42 @@
 #ifdef CAN_ON
 #include "can.h"
 #include "can_filters.h"
+#pragma message("CAN: ON!")
 #else
 #pragma message("CAN: OFF!")
 #endif /*ifdef CAN_ON*/
 
 #ifdef ADC_ON 
 #include "adc.h"
+#pragma message("ADC: ON!")
 #else
 #pragma message("ADC: OFF!")
 #endif  /*ifdef ADC_ON*/
 
 #ifdef MACHINE_ON
 #include "machine.h"
+#pragma message("MACHINE: ON!")
 #else
 #pragma message("MACHINE: OFF!")
 #endif /*ifdef MACHINE_ON*/
 
 #ifdef PWM_ON
 #include "pwm.h"
+#pragma message("PWM: ON!")
 #else
 #pragma message("PWM: OFF!")
 #endif /*ifdef PWM*/
 
 #ifdef WATCHDOG_ON
 #include "watchdog.h"
+#pragma message("WATCHDOG: ON!")
 #else
 #pragma message("WATCHDOG: OFF!")
 #endif /*ifdef WATCHDOG_ON*/
 
 #ifdef SLEEP_ON
 #include "sleep.h"
+#pragma message("SLEEP: ON!")
 #else
 #pragma message("SLEEP: OFF!")
 #endif /*ifdef SLEEP_ON*/
