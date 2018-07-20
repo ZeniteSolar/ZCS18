@@ -10,6 +10,7 @@
  */
 inline void pertub_and_observe(void)
 {	
+#ifdef MACHINE_ON
 	// Computes power input
 	control.pi_med = (control.v_panel)*(control.i_panel);
 	// Respects limits for duty Cycle
@@ -26,4 +27,5 @@ inline void pertub_and_observe(void)
 
 	// recycles
 	control.pi_med_old = control.pi_med;
+#endif
 }

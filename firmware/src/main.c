@@ -14,15 +14,11 @@ int main(void)
     #ifdef PWM_ON
         VERBOSE_MSG_INIT(usart_send_string("PWM..."));
         pwm_init();
+	    set_bit(PWM_DDR, PWM);                      // PWM como saida
         VERBOSE_MSG_INIT(usart_send_string(" OK!\n"));
+    #else
+        VERBOSE_MSG_INIT(usart_send_string("PWM... OFF!\n"));
     #endif
-
- /*   #ifdef TEST_PWM
-        for(;;) OCR1A = 30;
-    #endif
-    */
-
-    //for(;;) OCR1A = 60;
 
     #ifdef CAN_ON
         VERBOSE_MSG_INIT(usart_send_string("CAN (500kbps)..."));
@@ -31,37 +27,49 @@ int main(void)
         VERBOSE_MSG_INIT(usart_send_string("CAN filters..."));
         can_static_filter(can_filter);
         VERBOSE_MSG_INIT(usart_send_string(" OK!\n"));
+    #else
+        VERBOSE_MSG_INIT(usart_send_string("CAN... OFF!\n"));
     #endif
 
     #ifdef ADC_ON
         VERBOSE_MSG_INIT(usart_send_string("ADC..."));
         adc_init();
         VERBOSE_MSG_INIT(usart_send_string(" OK!\n"));
+    #else
+        VERBOSE_MSG_INIT(usart_send_string("ADC... OFF!\n"));
     #endif
-
 
     #ifdef SLEEP_ON 
         VERBOSE_MSG_INIT(usart_send_string("SLEEP..."));
         sleep_init();
         VERBOSE_MSG_INIT(usart_send_string(" OK!\n"));
+    #else
+        VERBOSE_MSG_INIT(usart_send_string("SLEEP... OFF!\n"));
     #endif
 
     #ifdef WATCHDOG_ON
         VERBOSE_MSG_INIT(usart_send_string("WATCHDOG..."));
         wdt_init();
         VERBOSE_MSG_INIT(usart_send_string(" OK!\n"));
+    #else
+        VERBOSE_MSG_INIT(usart_send_string("WATCHDOG... OFF!\n"));
     #endif
 
  	#ifdef MACHINE_ON
         VERBOSE_MSG_INIT(usart_send_string("MACHINE..."));
 		machine_init();
         VERBOSE_MSG_INIT(usart_send_string(" OK!\n"));
+    #else
+        VERBOSE_MSG_INIT(usart_send_string("MACHINE... OFF!\n"));
 	#endif
 	
-    set_bit(LED_DDR, LED);                      // LED como saída
-    #ifdef PWM_ON
-	set_bit(PWM_DDR, PWM);                      // PWM como saida
+    #ifdef LED_ON
+        set_bit(LED_DDR, LED);                      // LED como saída
+        VERBOSE_MSG_INIT(usart_send_string("LED... OK!\n"));
+    #else
+        VERBOSE_MSG_INIT(usart_send_string("LED... OFF!\n"));
     #endif
+
 	/*
     // ------------------------------------------------------------------------
 	clr_bit(BatOverVoltageInterrupt_DDR,BatOverVoltageInterrupt);	// BatOverVoltageInterrupt como entrada

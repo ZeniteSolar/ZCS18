@@ -11,12 +11,12 @@
 #define CAN_APP_H 
 
 #include "conf.h"
-#include "machine.h"
-#include "can.h"
-#include "can_ids.h"
-#include "usart.h"
 #include "dbg_vrb.h"
 #include "../lib/bit_utils.h"
+#include "can.h"
+#include "can_ids.h"
+#include "machine.h"
+#include "usart.h"
 
 void can_app_print_msg(can_t *msg);
 void can_app_task(void);

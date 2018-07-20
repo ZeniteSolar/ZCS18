@@ -8,17 +8,17 @@
  */
 
 #ifndef CONF_H
-#define CONF_H
+//#define CONF_H
 
 // CONFIGURACOES DE COMPILACAO
 //#define DEBUG_ON
 //#define VERBOSE_ON
 //#define VERBOSE_ON_CAN_APP
-#define VERBOSE_ON_MACHINE
+//#define VERBOSE_ON_MACHINE
 //#define VERBOSE_ON_ADC
 //#define VERBOSE_ON_PWM
-#define VERBOSE_ON_INIT
-#define VERBOSE_ON_ERROR
+//#define VERBOSE_ON_INIT
+//#define VERBOSE_ON_ERROR
 
 // TESTS
 //#define TEST_PWM
@@ -27,19 +27,20 @@
 #define USART_ON
 //#define CAN_ON
 //#define CAN_DEPENDENT
-#define ADC_ON
-#define MACHINE_ON
-#define PWM_ON
-#define WATCHDOG_ON
-#define SLEEP_ON
+//#define ADC_ON
+//#define MACHINE_ON
+//#define PWM_ON
+//#define LED_ON
+//#define WATCHDOG_ON
+//#define SLEEP_ON
 
  // WARNING: DEFINITIONS FOR TEST THE CONVERTER WITH FIXED DUTY CYCLE!!!
 // WARNING: DEFINITIONS FOR TEST THE CONVERTER WITH FIXED DUTY CYCLE!!!
 // WARNING: DEFINITIONS FOR TEST THE CONVERTER WITH FIXED DUTY CYCLE!!!
 // WARNING: DEFINITIONS FOR TEST THE CONVERTER WITH FIXED DUTY CYCLE!!!
 // WARNING: DEFINITIONS FOR TEST THE CONVERTER WITH FIXED DUTY CYCLE!!!
-#define CONVERTER_TEST_WITH_FIXED_DUTYCYCLE
-#define CONVERTER_TEST_WITH_FIXED_DUTYCYCLE_DT_VALUE 49
+//#define CONVERTER_TEST_WITH_FIXED_DUTYCYCLE
+//#define CONVERTER_TEST_WITH_FIXED_DUTYCYCLE_DT_VALUE 49
  
 
 // PWM DEFINITIONS
@@ -62,9 +63,7 @@
 #endif
 
 // INPUT PINS DEFINITIONS
-
-
-#define     BatOverVoltageInterrupt_PORT PORTD	// <--------- ADICIONADO
+/*#define     BatOverVoltageInterrupt_PORT PORTD	// <--------- ADICIONADO
 #define     BatOverVoltageInterrupt_PIN  PIND
 #define     BatOverVoltageInterrupt_DDR  DDRD
 #define     BatOverVoltageInterrupt      PD2
@@ -73,6 +72,7 @@
 #define     Enable_PIN              PIND
 #define     Enable_DDR              DDRD
 #define     Enable                  PD3
+*/
 
 // OUTPUT PINS DEFINITIONS
 #ifdef PWM_ON
@@ -82,6 +82,7 @@
 #define     PWM                     PB1
 #endif 
 
+#ifdef LED_ON
 #define     LED_PORT                PORTD
 #define     LED_PIN                 PIND
 #define     LED_DDR                 DDRD
@@ -89,6 +90,7 @@
 #define     cpl_led()               cpl_bit(LED_PORT, LED)
 #define     set_led()               set_bit(LED_PORT, LED)
 #define     clr_led()               clr_bit(LED_PORT, LED)
+#endif
 
 // CANBUS DEFINITONS
 // ----------------------------------------------------------------------------

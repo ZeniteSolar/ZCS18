@@ -5,6 +5,7 @@
  */
 inline void can_app_print_msg(can_t *msg)
 {
+#ifdef USART_ON
     usart_send_string("ID: ");
     usart_send_uint16(msg->id);
     usart_send_string(". D: ");
@@ -20,6 +21,7 @@ inline void can_app_print_msg(can_t *msg)
     usart_send_char(' ');
     usart_send_uint16(err.tx);
     usart_send_char('\n');
+#endif
 }
 
 /**
@@ -30,13 +32,17 @@ inline void can_app_task(void)
     check_can();
 
     if(can_app_send_state_clk_div++ >= CAN_APP_SEND_STATE_CLK_DIV){
+#ifdef USART_ON
         VERBOSE_MSG_CAN_APP(usart_send_string("state msg was sent.\n"));
+#endif
         can_app_send_state();
         can_app_send_state_clk_div = 0;
     }
 
     if(can_app_send_mppt_clk_div++ >= CAN_APP_SEND_MPPT_CLK_DIV){
+#ifdef USART_ON
         VERBOSE_MSG_CAN_APP(usart_send_string("mppt msg was sent.\n"));
+#endif
         can_app_send_mppt();
         can_app_send_mppt_clk_div = 0;
     }
@@ -134,17 +140,23 @@ inline void can_app_msg_extractors_switch(can_t *msg)
     if(msg->data[CAN_SIGNATURE_BYTE] == CAN_SIGNATURE_MIC17){
         switch(msg->id){
             case CAN_FILTER_MSG_MIC17_MPPTS:
+#ifdef USART_ON
                 VERBOSE_MSG_CAN_APP(usart_send_string("got a mppt msg: "));
+#endif
                 VERBOSE_MSG_CAN_APP(can_app_print_msg(msg));
                 can_app_extractor_mic17_mppt(msg);
                 break;
             case CAN_FILTER_MSG_MIC17_STATE:
+#ifdef USART_ON
                 VERBOSE_MSG_CAN_APP(usart_send_string("got a state msg: "));
+#endif
                 VERBOSE_MSG_CAN_APP(can_app_print_msg(msg));
                 can_app_extractor_mic17_state(msg);
                 break;
             default:
+#ifdef USART_ON
                 VERBOSE_MSG_CAN_APP(usart_send_string("got a unknown msg: "));
+#endif
                 VERBOSE_MSG_CAN_APP(can_app_print_msg(msg));
                 break;
         }    
@@ -162,7 +174,9 @@ inline void check_can(void)
     //VERBOSE_MSG_CAN_APP(usart_send_uint16(can_app_checks_without_mic17_msg));
 #ifdef CAN_DEPENDENT
     if(can_app_checks_without_mic17_msg++ >= CAN_APP_CHECKS_WITHOUT_MIC17_MSG){
+#ifdef USART_ON
         VERBOSE_MSG_CAN_APP(usart_send_string("Error: too many cycles withtou message.\n"));
+#endif
         can_app_checks_without_mic17_msg = 0;
         error_flags.no_canbus = 1;
         set_state_error();

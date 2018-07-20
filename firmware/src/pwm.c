@@ -6,6 +6,7 @@
  */
 void pwm_init()
 {
+#ifdef PWM_ON
     // configuracao do Timer TC1 --> TIMER DO PWM
     //TCCR1B |= ((0<<ICNC1) | (0<<ICES1));
     
@@ -24,11 +25,10 @@ void pwm_init()
 
     ICR1   = 80;                                    // valor TOP para f_pwm = 100kHz
     OCR1A  = INITIAL_D;                             // D = %*ICR1
-
     set_bit(PWM_DDR, PWM);                          // PWM como saida
       
     // Equacao para Frequencia do PWM:       ICR1 = (f_osc)/(2*f_pwm);
-
+#endif
 }
 
 /**
@@ -37,7 +37,9 @@ void pwm_init()
 inline void pwm_reset(void)
 {
     set_pwm_off();
+#ifdef MACHINE_ON
     control.D = 0;
+#endif
     VERBOSE_MSG_PWM(usart_send_string("PWM turned off!\n"));
 }
 
@@ -48,6 +50,7 @@ inline void pwm_reset(void)
 
 inline void pwm_compute(void)
 {	
+#ifdef MACHINE_ON
     if(adc_data_ready){
 	    pertub_and_observe();
         adc_data_ready = 0;
@@ -69,6 +72,7 @@ inline void pwm_compute(void)
         OCR1A = control.D;
         adc_data_ready = 0;
     }
+#endif
 
     VERBOSE_MSG_PWM(usart_send_string("PWM computed as: "));
     VERBOSE_MSG_PWM(usart_send_uint16(OCR1A));
@@ -81,8 +85,11 @@ inline void pwm_compute(void)
  */
 inline void pwm_treat_fault(void)
 {
-    /*if(control.D_raw_target > 10)
+    /*
+#ifdef MACHINE_ON
+    if(control.D_raw_target > 10)
         control.D_raw_target -= 6;      // -10%
+#endif
         */
     if(OCR1A > 10)
         OCR1A -= 6;

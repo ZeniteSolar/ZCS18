@@ -14,11 +14,15 @@
 #include <avr/interrupt.h>
 
 #include "conf.h"
-#include "usart.h"
 #include "dbg_vrb.h"
-#include "machine.h"
 #include "PeO.h"
 #include "../lib/cbuf.h"
+#ifdef USART_ON
+#include "usart.h"
+#endif
+#ifdef MACHINE_ON
+#include "machine.h"
+#endif
 
 #ifndef INITIAL_D
 #define INITIAL_D 0

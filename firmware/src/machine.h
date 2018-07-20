@@ -12,6 +12,7 @@
 
 #include <avr/io.h>
 #include <avr/wdt.h>
+#include <avr/interrupt.h>
 
 #include "conf.h"
 
@@ -20,7 +21,7 @@
 #define MINIMUM_IDLE_PANEL_CURRENT 0
 #define MAXIMUM_IDLE_PANEL_VOLTAGE 50200 // 50,2 V
 #define MINIMUM_IDLE_PANEL_VOLTAGE 0
-#
+
 #define MAXIMUM_RUNNING_PANEL_CURRENT 11000 // 12,500 A
 #define MINIMUM_RUNNING_PANEL_CURRENT 0
 #define MAXIMUM_RUNNING_PANEL_VOLTAGE 50200 // 50,2 V

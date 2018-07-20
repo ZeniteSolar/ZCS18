@@ -56,7 +56,13 @@
 #pragma message("PWM: ON!")
 #else
 #pragma message("PWM: OFF!")
-#endif /*ifdef PWM*/
+#endif /*ifdef PWM_ON*/
+
+#ifdef LED_ON
+#pragma message("LED: ON!")
+#else
+#pragma message("LED: OFF!")
+#endif /*ifdef LED_ON*/
 
 #ifdef WATCHDOG_ON
 #include "watchdog.h"

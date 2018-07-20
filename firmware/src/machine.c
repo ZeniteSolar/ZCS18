@@ -22,7 +22,6 @@ void machine_init(void)
             | (1 << CS20);
     OCR2A   =   240; //80                               // Valor para igualdade de comparacao A par  a frequencia de 150 Hz
     TIMSK2 |=   (1 << OCIE2A);                      // Ativa a interrupcao na igualdade de comp  aração do TC2 com OCR2A
-
 	
 } 
 
@@ -48,9 +47,11 @@ inline void check_pwm_fault(void)
 inline void check_buffers(void)
 {
     //VERBOSE_MSG_MACHINE(usart_send_string("Checking buffers..."));
+#ifdef ADC_ON
     while(!CBUF_IsFull(cbuf_adc0));
     while(!CBUF_IsFull(cbuf_adc1));
     while(!CBUF_IsFull(cbuf_adc2));
+#endif
     //VERBOSE_MSG_ERROR(usart_send_string("<No buffers to check>"));
     //VERBOSE_MSG_MACHINE(usart_send_string(" \t\tdone.\n")); 
 }
@@ -60,7 +61,9 @@ inline void check_buffers(void)
  */
 inline void check_idle_panel_current(void)
 { 
+#ifdef ADC_ON
     control.i_panel = ma_adc0() * CONVERSION_PANEL_CURRENT_VALUE;
+#endif
 
 	/*if(control.i_panel >= MAXIMUM_IDLE_PANEL_CURRENT ){		// MAXIMUM_RUNNING_PANEL_VOLTAGE sem valor em #define 
 		error_flags.overcurrent = 1;
@@ -75,7 +78,9 @@ inline void check_idle_panel_current(void)
  */
 inline void check_idle_panel_voltage(void)
 {
+#ifdef ADC_ON
     control.v_panel = ma_adc1() * CONVERSION_PANEL_VOLTAGE_VALUE;
+#endif
    	/*if(control.v_panel >= MAXIMUM_IDLE_PANEL_VOLTAGE){
 	   	error_flags.overvolt_panel = 1;
    	}else if(control.v_panel <= MINIMUM_IDLE_PANEL_VOLTAGE){
@@ -97,7 +102,9 @@ inline void check_idle_battery_voltage(void)
  */
 inline void check_running_panel_current(void)
 {
+#ifdef ADC_ON
    	control.i_panel = ma_adc0() * CONVERSION_PANEL_CURRENT_VALUE;
+#endif
 	
     if(control.i_panel >= MAXIMUM_RUNNING_PANEL_CURRENT ){		// MAXIMUM_RUNNING_PANEL_VOLTAGE sem valor em #define 
 		error_flags.overcurrent = 1;
@@ -111,7 +118,9 @@ inline void check_running_panel_current(void)
  */
 inline void check_running_panel_voltage(void)
 {
+#ifdef ADC_ON
    	control.v_panel = ma_adc1() * CONVERSION_PANEL_VOLTAGE_VALUE;
+#endif
    	/*
     if(control.v_panel >= MAXIMUM_RUNNING_PANEL_VOLTAGE){		// MAXIMUM_RUNNING_PANEL_VOLTAGE sem valor em #define 
 	   	error_flags.overvolt_panel = 1;
@@ -126,7 +135,9 @@ inline void check_running_panel_voltage(void)
  */
 inline void check_running_battery_voltage(void) // sem panel
 {
+#ifdef ADC_ON
    	control.v_bat = ma_adc2() * CONVERSION_BATTERY_VOLTAGE_VALUE;
+#endif
 	   
    	if(control.v_bat >= MAXIMUM_BATTERY_VOLTAGE){		// MAXIMUM_RUNNING_PANEL_VOLTAGE sem valor em #define 
 	   	error_flags.overvoltage = 1;
@@ -157,7 +168,9 @@ inline void set_state_initializing(void)
 inline void set_state_idle(void)
 {
     state_machine = STATE_IDLE;
+#ifdef PWM_ON
     pwm_reset();
+#endif
 }
 
 /**
@@ -237,8 +250,12 @@ inline void print_control(void)
  */
 inline void task_initializing(void)
 {
+#ifdef LED_ON
     set_led();
+#endif
+#ifdef PWM_ON
     set_pwm_off();
+#endif
     pwm_fault_count = 0;
 
     check_buffers();
@@ -259,14 +276,18 @@ inline void task_initializing(void)
  */
 inline void task_idle(void)
 {
+#ifdef LED_ON
     if(led_clk_div++ >= 50){
         cpl_led();
         led_clk_div = 0;
-    }
+    }        
+#endif
 
     check_idle_panel_current();
     check_idle_panel_voltage();
     check_idle_battery_voltage();
+
+#ifdef PWM_ON
 
     if(system_flags.mppt_on && system_flags.enable){
         if(init_pwm_increment_divider++){
@@ -284,6 +305,8 @@ inline void task_idle(void)
             }
         }
     }
+#endif
+
 }
 
 
@@ -292,10 +315,12 @@ inline void task_idle(void)
  */
 inline void task_running(void)
 {
+#ifdef LED_ON
     if(led_clk_div++ >= 10){
         cpl_led();
         led_clk_div = 0;
     }
+#endif
 
     check_running_panel_current();
     check_running_panel_voltage();
@@ -305,7 +330,9 @@ inline void task_running(void)
     adc_data_ready = 1;
 
     if(system_flags.mppt_on && system_flags.enable){
+#ifdef PWM_ON
         pwm_compute();
+#endif
     }else{
         set_state_idle();
     }
@@ -317,12 +344,16 @@ inline void task_running(void)
  */
 inline void task_error(void)
 {
+#ifdef LED_ON
     if(led_clk_div++ >= 5){
         cpl_led();
         led_clk_div = 0;
     }
+#endif
 
+#ifdef PWM_ON
     pwm_reset();
+#endif
 
     total_errors++;         // incrementa a contagem de erros
     VERBOSE_MSG_ERROR(usart_send_string("The error code is: "));
@@ -352,7 +383,9 @@ inline void task_error(void)
         for(;;);    // waits the watchdog to reset.
     }
     
+#ifdef LED_ON
     cpl_led();
+#endif
     set_state_initializing();
 }
 
@@ -408,7 +441,9 @@ ISR(INT1_vect) //enable
 {    
     /*if(bit_is_clear(FAULT_PIN, FAULT)){
         pwm_treat_fault();
+#ifdef LED_ON
         cpl_led();
+#endif
         pwm_fault_count++;
     }
     */
