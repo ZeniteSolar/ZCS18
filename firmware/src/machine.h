@@ -29,9 +29,9 @@
 #define MAXIMUM_BATTERY_VOLTAGE 46800 // 51,61 V  maximum value of voltage from battery in VOLTS
 #define MINIMUM_BATTERY_VOLTAGE 15000 // 15 V minimum value of voltage from battery in VOLTS
 
-#define CONVERSION_PANEL_CURRENT_VALUE   102    //102
-#define CONVERSION_PANEL_VOLTAGE_VALUE   231    //231
-#define CONVERSION_BATTERY_VOLTAGE_VALUE 256    //256 //400 
+#define CONVERSION_PANEL_CURRENT_VALUE   1    //102
+#define CONVERSION_PANEL_VOLTAGE_VALUE   1    //231
+#define CONVERSION_BATTERY_VOLTAGE_VALUE 1    //256 //400 
 
 #ifdef ADC_ON
 #include "adc.h"
