@@ -97,6 +97,15 @@ int main(void)
 
         #ifdef MACHINE_ON
             machine_run();
+        #else
+            cpl_led();
+            _delay_ms(300);
+            cpl_led();
+            _delay_ms(100);
+            cpl_led();
+            _delay_ms(100);
+            cpl_led();
+            _delay_ms(300);
         #endif
 
 		#ifdef SLEEP_ON
