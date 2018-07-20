@@ -14,7 +14,6 @@ int main(void)
     #ifdef PWM_ON
         VERBOSE_MSG_INIT(usart_send_string("PWM..."));
         pwm_init();
-	    set_bit(PWM_DDR, PWM);                      // PWM como saida
         VERBOSE_MSG_INIT(usart_send_string(" OK!\n"));
     #else
         VERBOSE_MSG_INIT(usart_send_string("PWM... OFF!\n"));
@@ -106,6 +105,19 @@ int main(void)
             _delay_ms(100);
             cpl_led();
             _delay_ms(300);
+
+        #ifdef PWM_ON
+            #ifdef PWM_TEST
+                #ifdef CONVERTER_TEST_WITH_FIXED_DUTYCYCLE
+                    set_pwm_duty_cycle(CONVERTER_TEST_WITH_FIXED_DUTYCYCLE_DT_VALUE);
+                #else
+                    static uint8_t i = 0;
+                    set_pwm_duty_cycle(i++);
+                    if(i>PWM_D_MAX) i = PWM_D_MIN;
+                #endif
+            #endif
+        #endif
+
         #endif
 
 		#ifdef SLEEP_ON
