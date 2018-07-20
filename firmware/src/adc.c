@@ -17,7 +17,11 @@ void init_buffers(void)
  * if N = 2^k, then Ma = (Summation of x[i] from i=0 to N) >> k
  *
  */
+#ifdef ADC_8BITS
 uint8_t ma_adc0(void)
+#else
+uint16_t ma_adc0(void)
+#endif
 {   
     uint16_t sum = 0;
     for(uint8_t i = cbuf_adc0_SIZE; i; i--){
@@ -34,7 +38,11 @@ uint8_t ma_adc0(void)
 * if N = 2^k, then Ma = (Summation of x[i] from i=0 to N) >> k
 *
 */
+#ifdef ADC_8BITS
 uint8_t ma_adc1(void)
+#else
+uint16_t ma_adc1(void)
+#endif
 {   
     uint16_t sum = 0;
     for(uint8_t i = cbuf_adc1_SIZE; i; i--){
@@ -51,7 +59,11 @@ uint8_t ma_adc1(void)
 * if N = 2^k, then Ma = (Summation of x[i] from i=0 to N) >> k
 *
 */
+#ifdef ADC_8BITS
 uint8_t ma_adc2(void)
+#else
+uint16_t ma_adc2(void)
+#endif 
 {   
     uint16_t sum = 0;
     for(uint8_t i = cbuf_adc2_SIZE; i; i--){

@@ -47,7 +47,7 @@ volatile struct cbuf_adc0{
 #endif
 
 } cbuf_adc0;
-#ifndef ADC_8BITS
+#ifdef ADC_8BITS
 uint8_t ma_adc0(void);
 uint8_t avg_adc0;
 #else
@@ -60,18 +60,18 @@ uint16_t avg_adc0;
 volatile struct cbuf_adc1{
     uint8_t     m_getIdx;
     uint8_t     m_putIdx;
-#ifndef ADC_8BITS
+#ifdef ADC_8BITS
     uint8_t     m_entry[cbuf_adc1_SIZE];
 #else
     uint16_t    m_entry[cbuf_adc1_SIZE];
 #endif
 } cbuf_adc1; 
-#ifndef ADC_8BITS
+#ifdef ADC_8BITS
 uint8_t ma_adc1(void);
 uint8_t avg_adc1;
 #else
-uint16_t ma_adc0(void);
-uint16_t avg_adc0;
+uint16_t ma_adc1(void);
+uint16_t avg_adc1;
 #endif
 
 #define cbuf_adc2_SIZE          32        // size of buffers
@@ -79,18 +79,18 @@ uint16_t avg_adc0;
 volatile struct cbuf_adc2{
     uint8_t     m_getIdx;
     uint8_t     m_putIdx;
-#ifndef ADC_8BITS
+#ifdef ADC_8BITS
     uint8_t     m_entry[cbuf_adc2_SIZE];
 #else
     uint16_t    m_entry[cbuf_adc2_SIZE];
 #endif
 } cbuf_adc2;  
-#ifndef ADC_8BITS
+#ifdef ADC_8BITS
 uint8_t ma_adc2(void);
 uint8_t avg_adc2;
 #else
-uint16_t ma_adc0(void);
-uint16_t avg_adc0;
+uint16_t ma_adc2(void);
+uint16_t avg_adc2;
 #endif
 
 #endif /* ifndef _ADC_H_ */
