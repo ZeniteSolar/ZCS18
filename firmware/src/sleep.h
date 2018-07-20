@@ -3,7 +3,9 @@
  *
  * @defgroup SLEEP Sleep Module
  *
- * @brief A simple sleep module
+ * @brief A simple sleep module. Note that some interruption should be
+ * configured to wake the device even in SLEEP_MODE_IDLE.
+ *
  *
  */
 

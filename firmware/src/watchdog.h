@@ -3,7 +3,9 @@
  *
  * @defgroup WATCHDOG Watchdog Module
  *
- * @brief A simple watchdog
+ * @brief A simple watchdog.
+ *
+ * A simple way to test the watchdog is to not call wdt_reset() and let it acts.
  *
  */
 
