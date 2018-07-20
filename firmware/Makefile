@@ -63,7 +63,7 @@ TARGET = $(lastword $(subst /, ,$(CURDIR)))
 SRCS	=	$(shell find $(SRCDIR) -type f -name \*.c)
 OBJS	=	$(patsubst $(SRCDIR)/%,$(OBJDIR)/%,$(SRCS:.c=.o))
 
-#SILENT ?= @
+SILENT ?= @
 CROSS ?= avr-
 ifneq ($(CROSS), )
 	CC = $(CROSS)gcc
