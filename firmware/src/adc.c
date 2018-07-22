@@ -120,19 +120,17 @@ void adc_init(void)
             | (1 << ADPS0);
 
 
-    clr_bit(PRR0, PRTIM0);                          // Activates clock to timer0
-    set_bit(DDRD, PD5);
-    set_bit(DDRD, PD6);
 
     // configuracao do Timer TC0 --> TIMER DO ADC
+    clr_bit(PRR0, PRTIM0);                          // Activates clock to timer0
+    //set_bit(DDRD, PD5);
+    //set_bit(DDRD, PD6);
     TCCR0A  =   (1 << WGM01) | (0 << WGM00)         // Timer 0 in Mode 2 = CTC (clear on compare)
-            | (0 << COM0A1) | (0 << COM0A0)         // Normal port operation
-            | (0 << COM0B1) | (0 << COM0B0);        // do nothing with OC0B
+            | (0 << COM0B1) | (0 << COM0B0)         // do nothing with OC0B
+            | (0 << COM0A1) | (0 << COM0A0);        // Normal port operation
     TCCR0B  =   (0 << WGM02)                        // Timer 0 in Mode 2 = CTC (clear on compare)
             | (0 << FOC0A) | (0 << FOC0B)           // dont force outputs
-            | (0 << CS02)                           // clock enabled, prescaller = 64
-            | (1 << CS01)
-            | (0 << CS00);
+            | (0 << CS02) | (1 << CS01) | (0 << CS00); // clock enabled, prescaller = 64
 
 	OCR0A  =    199;                                 // Valor para igualdade de comparacao A para frequencia de 5kHz
     TIMSK0 |=   (1 << OCIE0A);                      // Ativa a interrupcao na igualdade de comparação do TC0 com OCR0A
