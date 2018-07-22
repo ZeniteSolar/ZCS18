@@ -56,6 +56,32 @@ inline void usart_send_uint16(uint16_t num)
 }
 
 /**
+ * @brief sends a number in ascii trough serial.
+ * The number could be represent with left-filled with a defined FILL char in 
+ * a defined BASE. Note that the LEN is 11 because 2^32 have its maximum ascii
+ * size represented with 10 chars + '\0' in the end.
+ */
+inline void usart_send_uint32(uint32_t num)
+{
+    #define LEN     11              // length of the string w/ null terminator
+    #define BASE    10              // string as a decimal base
+    #define FILL    '0'             // character to fill non-used algarisms.
+    
+    uint8_t i = LEN -1;             // index for each char of the string
+    char str[LEN] = {FILL};         // ascii zero filled array
+    str[i] = '\0';                  // adds string null terminator
+    while(i--){
+        str[i] = FILL + (num % BASE);// gets each algarism}
+        num /= BASE;                // prepare the next
+    }
+    usart_send_string(str);       // sends the string
+    
+    #undef LEN
+    #undef BASE
+    #undef FILL
+}
+ 
+/**
  * @brief sends a buffer through serial. Max lenght is 255.
  */
 inline void usart_send_buffer(uint8_t *b, uint8_t lenght)

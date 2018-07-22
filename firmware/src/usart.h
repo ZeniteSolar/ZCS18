@@ -35,6 +35,8 @@ void usart_send_string(const char *s);
 
 void usart_send_uint16(uint16_t num);
 
+void usart_send_uint32(uint32_t num);
+
 void usart_send_buffer(uint8_t *b, uint8_t lenght);
 
 void usart_init(uint16_t ubrr, uint8_t rx, uint8_t tx);
