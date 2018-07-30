@@ -6,13 +6,6 @@
 void pwm_init()
 {
 #ifdef PWM_ON
-    /* OLD CONFIGURATION
-  	TCCR1A |= 0b10000010;
-  	TCCR1B |= 0b00010001;
-    ICR1   = 80;                                    // valor TOP para f_pwm = 100kHz
-    OCR1A  = INITIAL_D;                             // D = %*ICR1
-    set_bit(PWM_DDR, PWM);                          // PWM como saida
-    */
       
     clr_bit(PRR0, PRTIM1);                          // Activates clock
     
@@ -21,15 +14,25 @@ void pwm_init()
             | (0 << COM1B1) | (0 << COM1B0)         // do nothing
             | (1 << COM1A1) | (0 << COM1A0);        // pwm
 
-    TCCR1B =    (0 << CS12) | (0 << CS11) | (1 << CS10) // Prescaler N=1
+    TCCR1B =
+#if PWM_PRESCALE ==     1
+            (0 << CS12) | (0 << CS11) | (1 << CS10) // Prescaler N=1
+#elif PWM_PRESCALE ==   8
+            (0 << CS12) | (0 << CS11) | (1 << CS10) // Prescaler N=8
+#elif PWM_PRESCALE ==   64
+            (0 << CS12) | (1 << CS11) | (0 << CS10) // Prescaler N=64
+#elif PWM_PRESCALE ==   256
+            (0 << CS12) | (1 << CS11) | (1 << CS10) // Prescaler N=256
+#elif PWM_PRESCALE ==   1024
+            (1 << CS12) | (0 << CS11) | (1 << CS10) // Prescaler N=1024
+#else 
+            0
+#endif
             | (1 << WGM13) | (1 << WGM12);          // mode 14
     
-    ICR1 = 159;                                     // ICR1 = TOP = fcpu/(N*f) -1
+    ICR1 = PWM_TOP;                                 // ICR1 = TOP = fcpu/(N*f) -1
     OCR1A = INITIAL_D;                              // set initial Duty Cycle
     set_bit(PWM_DDR, PWM);                          // PWM as output
-    
-    // note that the resolution is R = log10(TOP +1)/log10(2);
-    // for IRC1 = 159, it has 7.3 bits of resolution.
 
 #endif
 }
