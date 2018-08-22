@@ -31,11 +31,11 @@ void wdt_first(void)
 }
 
 /**	
- * @brief inicializa o watchdog em 8s 
+ * @brief initialize watchdog with some predefined time
  */
 void wdt_init(void)
 {
-    wdt_enable(WDTO_2S);
+    wdt_enable(WDTO_4S);
 }
 
 #endif /* ifndef WATCHDOG_H */
