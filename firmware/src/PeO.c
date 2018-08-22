@@ -11,21 +11,43 @@
 inline void pertub_and_observe(void)
 {	
 #ifdef MACHINE_ON
+
 	// Computes power input
-	control.pi_med = (control.v_panel)*(control.i_panel);
-	// Respects limits for duty Cycle
-	if( control.pi_med < control.pi_med_old )	control.updown ^=1; // configurar updown como variavel global (talvez)
+	control.pi[0] = (uint32_t)control.vi[0] * (uint32_t)control.ii[0];
 
-	// Apply a perturbation
-	if(!control.updown) control.D -= D_STEP;		// D_STEP nao tem valor em #define 
-	else control.D += D_STEP;
+    // Derivate power
+	int32_t dpi = ((int32_t)control.pi[0]) -((int32_t)control.pi[1]);
+    // Derivate voltage
+    int32_t dvi = ((int32_t)control.vi[0]) -((int32_t)control.vi[1]);
 
-    // WARNING: DEFINITIONS FOR TEST THE CONVERTER WITH FIXED DUTY CYCLE!!!
+
 #ifdef CONVERTER_TEST_WITH_FIXED_DUTYCYCLE
+    // WARNING: DEFINITIONS FOR TEST THE CONVERTER WITH FIXED DUTY CYCLE!!!
     control.D = CONVERTER_TEST_WITH_FIXED_DUTYCYCLE_DT_VALUE;
+#else
+ 	if(dpi){
+//     	uint8_t c *= (1 +0.1*control.vi[0]/(1+control.ii[0]);
+     	uint8_t c = D_STEP;
+		if(dpi < 0){
+		    control.updown ^=1;
+            if(dvi > 0){
+                control.D += c;
+            }else{
+                control.D -= c;
+            }
+        }else{
+            if(dvi > 0){
+                control.D -= c;
+            }else{
+                control.D += c;
+            }
+        }
+	}
 #endif
 
 	// recycles
-	control.pi_med_old = control.pi_med;
+	control.pi[1] = control.pi[0];
+    control.vi[1] = control.vi[0];
+    control.ii[1] = control.ii[0];
 #endif
 }

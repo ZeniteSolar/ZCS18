@@ -81,14 +81,17 @@ typedef union error_flags{
 
 typedef struct control{
     uint16_t    D;              // value converted from 0 to TOP
-    uint8_t     mppt_pot_limit;
+    uint8_t     mppt_pot_limit; //
     uint8_t     fault;          // counts the faults from ir2127
 	uint8_t		updown;			// value of comp. in function pertub_and_observe()
-    uint16_t    i_panel;              // value of panel current in AMPS
-    uint16_t    v_panel;              // value of panel voltage in VOLTS
-	uint16_t	v_bat;			// value of battery voltage in VOLTS
-	uint16_t	pi_med;			// value of power in WATTS
-	uint16_t	pi_med_old;		//value of power old in WATTS
+    uint16_t    ii[2];          // value of panel current in AMPS
+    uint16_t    vi[2];          // value of panel voltage in VOLTS
+	uint16_t	vo[2];		    // value of battery voltage in VOLTS
+#ifdef ADC_8BITS
+	uint16_t	pi[2];			// value of power in WATTS
+#else
+	uint32_t	pi[2];			// value of power in WATTS
+#endif
 
 }control_t;
 

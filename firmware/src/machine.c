@@ -62,12 +62,12 @@ inline void check_buffers(void)
 inline void check_idle_panel_current(void)
 { 
 #ifdef ADC_ON
-    control.i_panel = ma_adc0() * CONVERSION_PANEL_CURRENT_VALUE;
+    control.ii[0] = ma_adc0() * CONVERSION_PANEL_CURRENT_VALUE;
 #endif
 
-	/*if(control.i_panel >= MAXIMUM_IDLE_PANEL_CURRENT ){		// MAXIMUM_RUNNING_PANEL_VOLTAGE sem valor em #define 
+	/*if(control.ii[0] >= MAXIMUM_IDLE_PANEL_CURRENT ){		// MAXIMUM_RUNNING_PANEL_VOLTAGE sem valor em #define 
 		error_flags.overcurrent = 1;
-	}else if(control.i_panel <= MINIMUM_IDLE_PANEL_CURRENT){
+	}else if(control.ii[0] <= MINIMUM_IDLE_PANEL_CURRENT){
 		error_flags.undercurrent = 1;
 	}else error_flags.overcurrent = 0;*/
  
@@ -79,11 +79,11 @@ inline void check_idle_panel_current(void)
 inline void check_idle_panel_voltage(void)
 {
 #ifdef ADC_ON
-    control.v_panel = ma_adc1() * CONVERSION_PANEL_VOLTAGE_VALUE;
+    control.vi[0] = ma_adc1() * CONVERSION_PANEL_VOLTAGE_VALUE;
 #endif
-   	/*if(control.v_panel >= MAXIMUM_IDLE_PANEL_VOLTAGE){
+   	/*if(control.vi[0] >= MAXIMUM_IDLE_PANEL_VOLTAGE){
 	   	error_flags.overvolt_panel = 1;
-   	}else if(control.v_panel <= MINIMUM_IDLE_PANEL_VOLTAGE){
+   	}else if(control.vi[0] <= MINIMUM_IDLE_PANEL_VOLTAGE){
 		error_flags.undervol_panel = 1;	
 	}else error_flags.overvolt_panel = 0; 
     */
@@ -103,12 +103,12 @@ inline void check_idle_battery_voltage(void)
 inline void check_running_panel_current(void)
 {
 #ifdef ADC_ON
-   	control.i_panel = ma_adc0() * CONVERSION_PANEL_CURRENT_VALUE;
+   	control.ii[0] = ma_adc0() * CONVERSION_PANEL_CURRENT_VALUE;
 #endif
 	
-    if(control.i_panel >= MAXIMUM_RUNNING_PANEL_CURRENT ){		// MAXIMUM_RUNNING_PANEL_VOLTAGE sem valor em #define 
+    if(control.ii[0] >= MAXIMUM_RUNNING_PANEL_CURRENT ){		// MAXIMUM_RUNNING_PANEL_VOLTAGE sem valor em #define 
 		error_flags.overcurrent = 1;
-	/*}else if(control.i_panel <= MINIMUM_RUNNING_PANEL_CURRENT){
+	/*}else if(control.ii[0] <= MINIMUM_RUNNING_PANEL_CURRENT){
 		error_flags.undercurrent = 1;*/
 	}else error_flags.overcurrent = 0;
 }
@@ -119,12 +119,12 @@ inline void check_running_panel_current(void)
 inline void check_running_panel_voltage(void)
 {
 #ifdef ADC_ON
-   	control.v_panel = ma_adc1() * CONVERSION_PANEL_VOLTAGE_VALUE;
+   	control.vi[0] = ma_adc1() * CONVERSION_PANEL_VOLTAGE_VALUE;
 #endif
    	/*
-    if(control.v_panel >= MAXIMUM_RUNNING_PANEL_VOLTAGE){		// MAXIMUM_RUNNING_PANEL_VOLTAGE sem valor em #define 
+    if(control.vi[0] >= MAXIMUM_RUNNING_PANEL_VOLTAGE){		// MAXIMUM_RUNNING_PANEL_VOLTAGE sem valor em #define 
 	   	error_flags.overvolt_panel = 1;
-   	}else if(control.v_panel <= MINIMUM_RUNNING_PANEL_VOLTAGE){
+   	}else if(control.vi[0] <= MINIMUM_RUNNING_PANEL_VOLTAGE){
 		error_flags.undervol_panel = 1;	
 	}else error_flags.overvolt_panel = 0;
     */
@@ -136,12 +136,12 @@ inline void check_running_panel_voltage(void)
 inline void check_running_battery_voltage(void) // sem panel
 {
 #ifdef ADC_ON
-   	control.v_bat = ma_adc2() * CONVERSION_BATTERY_VOLTAGE_VALUE;
+   	control.vo[0] = ma_adc2() * CONVERSION_BATTERY_VOLTAGE_VALUE;
 #endif
 	   
-   	if(control.v_bat >= MAXIMUM_BATTERY_VOLTAGE){		// MAXIMUM_RUNNING_PANEL_VOLTAGE sem valor em #define 
+   	if(control.vo[0] >= MAXIMUM_BATTERY_VOLTAGE){		// MAXIMUM_RUNNING_PANEL_VOLTAGE sem valor em #define 
 	   	error_flags.overvoltage = 1;
-   	/*}else if(control.v_bat <= MINIMUM_BATTERY_VOLTAGE){
+   	/*}else if(control.vo[0] <= MINIMUM_BATTERY_VOLTAGE){
 		error_flags.undervoltage = 1; */
 	}else error_flags.overvoltage = 0; 
 }
@@ -222,22 +222,29 @@ inline void print_control(void)
     VERBOSE_MSG_MACHINE(usart_send_char(' '));
     
     VERBOSE_MSG_MACHINE(usart_send_string(" Ip: "));
-    VERBOSE_MSG_MACHINE(usart_send_uint16(control.i_panel));
+    VERBOSE_MSG_MACHINE(usart_send_uint16(control.ii[0]));
     VERBOSE_MSG_MACHINE(usart_send_char(' '));
 
     VERBOSE_MSG_MACHINE(usart_send_string(" Vp: "));
-    VERBOSE_MSG_MACHINE(usart_send_uint16(control.v_panel));
+    VERBOSE_MSG_MACHINE(usart_send_uint16(control.vi[0]));
     VERBOSE_MSG_MACHINE(usart_send_char(' '));
 
     VERBOSE_MSG_MACHINE(usart_send_string(" Vb: "));
-    VERBOSE_MSG_MACHINE(usart_send_uint16(control.v_bat));
+    VERBOSE_MSG_MACHINE(usart_send_uint16(control.vo[0]));
     VERBOSE_MSG_MACHINE(usart_send_char(' '));
 
     VERBOSE_MSG_MACHINE(usart_send_string(" Pp: "));
-    VERBOSE_MSG_MACHINE(usart_send_uint16(control.pi_med));
+#ifdef ADC_8BITS
+    VERBOSE_MSG_MACHINE(usart_send_uint16(control.pi[0]));
     VERBOSE_MSG_MACHINE(usart_send_char(' '));
-    VERBOSE_MSG_MACHINE(usart_send_uint16(control.pi_med_old));
+    VERBOSE_MSG_MACHINE(usart_send_uint16(control.pi[1]));
     VERBOSE_MSG_MACHINE(usart_send_char(' '));
+#else
+    VERBOSE_MSG_MACHINE(usart_send_uint32(control.pi[0]));
+    VERBOSE_MSG_MACHINE(usart_send_char(' '));
+    VERBOSE_MSG_MACHINE(usart_send_uint32(control.pi[1]));
+    VERBOSE_MSG_MACHINE(usart_send_char(' ')); 
+#endif
 
 }
 
@@ -396,7 +403,7 @@ inline void task_error(void)
 inline void machine_run(void)
 {
 	#ifdef CAN_ON
-    can_app_task();
+    //can_app_task();
     #else
     system_flags.enable = system_flags.mppt_on = 1;
 	#endif

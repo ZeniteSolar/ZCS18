@@ -12,7 +12,7 @@
 
 // CONFIGURACOES DE COMPILACAO
 //#define DEBUG_ON
-#define VERBOSE_ON
+//#define VERBOSE_ON
 //#define VERBOSE_ON_CAN_APP
 #define VERBOSE_ON_MACHINE
 //#define VERBOSE_ON_ADC
@@ -38,21 +38,26 @@
 
 // PWM DEFINITIONS
 #ifdef PWM_ON
-#define INITIAL_D                   0   //!< float value from 0 to 1
-#define PWM_D_DELTA                 1   //!< amount to increase (may interfer on threshholds)
-#define PWM_D_MAX_DELTA             1   //!< clock divisor
-#define PWM_D_MIN                   0   //!< minimum D
-#define PWM_D_MAX                   75 //!< maximum D
-#define PWM_D_MIN_THRESHHOLD        0   //!< minimum D threshhold
-#define PWM_D_MAX_THRESHHOLD        75 //!< maximum D threshhold
-#define PWM_D_LIN_MULT              1   //!< this is A for D = (D*A) >> B
-#define PWM_D_LIN_DIV               1   //!< this is B for D = (D*A) >> B
-#define PWM_INITIAL_D               CONVERTER_TEST_WITH_FIXED_DUTYCYCLE_DT_VALUE  // 30
-
 // WARNING: DEFINITIONS FOR TEST THE CONVERTER WITH FIXED DUTY CYCLE!!!
 //#define CONVERTER_TEST_WITH_FIXED_DUTYCYCLE
-#define CONVERTER_TEST_WITH_FIXED_DUTYCYCLE_DT_VALUE 49
+//#define CONVERTER_TEST_WITH_FIXED_DUTYCYCLE_DT_VALUE 0.60*(PWM_TOP)
 //#define PWM_TEST 
+ 
+#define INITIAL_D                   0               //!< float value from 0 to 1
+#define PWM_FREQUENCY               100000          //! frequency in Hz
+#define PWM_D_DELTA                 1               //!< amount to increase (may interfer on threshholds)
+#define PWM_D_MAX_DELTA             1               //!< clock divisor
+#define PWM_D_MIN                   0.01*(PWM_TOP)  //!< minimum D
+#define PWM_D_MAX                   0.9*(PWM_TOP)   //!< maximum D
+#define PWM_D_MIN_THRESHHOLD        PWM_D_MIN       //!< minimum D threshhold
+#define PWM_D_MAX_THRESHHOLD        PWM_D_MAX       //!< maximum D threshhold
+#define PWM_D_LIN_MULT              1               //!< this is A for D = (D*A) >> B
+#define PWM_D_LIN_DIV               1               //!< this is B for D = (D*A) >> B
+#ifdef CONVERTER_TEST_WITH_FIXED_DUTYCYCLE
+#define PWM_INITIAL_D               CONVERTER_TEST_WITH_FIXED_DUTYCYCLE_DT_VALUE
+#else
+#define PWM_INITIAL_D               0.6f*(PWM_TOP)
+#endif
 
 // number of checks before reset the pwm fault counter.
 #define CHECKS_BEFORE_RESET_FAULT_COUNTER 100
@@ -88,6 +93,10 @@
 #define     cpl_led()               cpl_bit(LED_PORT, LED)
 #define     set_led()               set_bit(LED_PORT, LED)
 #define     clr_led()               clr_bit(LED_PORT, LED)
+#else
+#define     cpl_led()               
+#define     set_led()               
+#define     clr_led()               
 #endif
 
 // CANBUS DEFINITONS

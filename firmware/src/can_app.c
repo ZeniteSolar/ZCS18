@@ -70,9 +70,9 @@ inline void can_app_send_mppt(void)
 
     msg.data[CAN_SIGNATURE_BYTE]            = CAN_SIGNATURE_SELF;
     msg.data[CAN_MSG_MCC17_MPPT_D_BYTE]     = control.D;
-    msg.data[CAN_MSG_MCC17_MPPT_IPANEL_BYTE]  = control.i_panel;
-    msg.data[CAN_MSG_MCC17_MPPT_VPANEL_BYTE]  = control.v_panel;
-    msg.data[CAN_MSG_MCC17_MPPT_VBAT_BYTE]    = control.v_bat;
+    msg.data[CAN_MSG_MCC17_MPPT_IPANEL_BYTE]  = control.ii[0];
+    msg.data[CAN_MSG_MCC17_MPPT_VPANEL_BYTE]  = control.vi[0];
+    msg.data[CAN_MSG_MCC17_MPPT_VBAT_BYTE]    = control.vo[0];
 
     can_send_message(&msg); 
 }

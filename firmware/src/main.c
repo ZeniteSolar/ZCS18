@@ -24,7 +24,7 @@ int main(void)
         can_init(BITRATE_500_KBPS);
         VERBOSE_MSG_INIT(usart_send_string(" OK!\n"));
         VERBOSE_MSG_INIT(usart_send_string("CAN filters..."));
-        can_static_filter(can_filter);
+        //can_static_filter(can_filter);
         VERBOSE_MSG_INIT(usart_send_string(" OK!\n"));
     #else
         VERBOSE_MSG_INIT(usart_send_string("CAN... OFF!\n"));

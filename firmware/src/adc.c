@@ -145,7 +145,7 @@ void adc_init(void)
 ISR(ADC_vect){
     switch(ADC_CHANNEL){
         case ADC0:
-            VERBOSE_MSG_ADC(usart_send_string("adc0: "));
+            VERBOSE_MSG_ADC(usart_send_string(" \tadc0: "));
 #ifdef ADC_8BITS
             CBUF_Push(cbuf_adc0, ADCH); 
 #else
@@ -154,7 +154,7 @@ ISR(ADC_vect){
             ADC_CHANNEL++;
             break;
         case ADC1:
-            VERBOSE_MSG_ADC(usart_send_string("adc1: "));
+            VERBOSE_MSG_ADC(usart_send_string(" \tadc1: "));
 #ifdef ADC_8BITS
             CBUF_Push(cbuf_adc1, ADCH); 
 #else
@@ -163,7 +163,7 @@ ISR(ADC_vect){
             ADC_CHANNEL++;
             break;
         case ADC2:
-            VERBOSE_MSG_ADC(usart_send_string("adc2: "));
+            VERBOSE_MSG_ADC(usart_send_string(" \tadc2: "));
 #ifdef ADC_8BITS
             CBUF_Push(cbuf_adc2, ADCH);
 #else
@@ -173,9 +173,14 @@ ISR(ADC_vect){
             //break;
         default:
             ADC_CHANNEL = ADC0;             // recycles
+            VERBOSE_MSG_ADC(usart_send_string("\n"));
             break;
     }        
-    VERBOSE_MSG_ADC(usart_send_uint16(ADCH));
+#ifdef ADC_8BITS
+    VERBOSE_MSG_ADC(usart_send_uint8(ADCH));
+#else
+    VERBOSE_MSG_ADC(usart_send_uint16(ADC));
+#endif
     adc_select_channel(ADC_CHANNEL);
 }
  
