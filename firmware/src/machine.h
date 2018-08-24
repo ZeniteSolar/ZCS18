@@ -33,6 +33,14 @@
 #define CONVERSION_PANEL_VOLTAGE_VALUE   1    //231
 #define CONVERSION_BATTERY_VOLTAGE_VALUE 1    //256 //400 
 
+#define ADC_PANEL_VOLTAGE       adc0
+#define ADC_PANEL_CURRENT       adc1
+#define ADC_BATTERY_VOLTAGE     adc2
+
+#define MA_PANEL_VOLTAGE        ma_adc0()
+#define MA_PANEL_CURRENT        ma_adc1()
+#define MA_BATTERY_VOLTAGE      ma_adc2()
+
 #ifdef ADC_ON
 #include "adc.h"
 #endif

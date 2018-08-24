@@ -62,7 +62,7 @@ inline void check_buffers(void)
 inline void check_idle_panel_current(void)
 { 
 #ifdef ADC_ON
-    control.ii[0] = ma_adc0() * CONVERSION_PANEL_CURRENT_VALUE;
+    control.ii[0] = MA_PANEL_CURRENT * CONVERSION_PANEL_CURRENT_VALUE;
 #endif
 
 	/*if(control.ii[0] >= MAXIMUM_IDLE_PANEL_CURRENT ){		// MAXIMUM_RUNNING_PANEL_VOLTAGE sem valor em #define 
@@ -79,7 +79,7 @@ inline void check_idle_panel_current(void)
 inline void check_idle_panel_voltage(void)
 {
 #ifdef ADC_ON
-    control.vi[0] = ma_adc1() * CONVERSION_PANEL_VOLTAGE_VALUE;
+    control.vi[0] = MA_PANEL_VOLTAGE * CONVERSION_PANEL_VOLTAGE_VALUE;
 #endif
    	/*if(control.vi[0] >= MAXIMUM_IDLE_PANEL_VOLTAGE){
 	   	error_flags.overvolt_panel = 1;
@@ -103,7 +103,7 @@ inline void check_idle_battery_voltage(void)
 inline void check_running_panel_current(void)
 {
 #ifdef ADC_ON
-   	control.ii[0] = ma_adc0() * CONVERSION_PANEL_CURRENT_VALUE;
+   	control.ii[0] = MA_PANEL_CURRENT * CONVERSION_PANEL_CURRENT_VALUE;
 #endif
 	
     if(control.ii[0] >= MAXIMUM_RUNNING_PANEL_CURRENT ){		// MAXIMUM_RUNNING_PANEL_VOLTAGE sem valor em #define 
@@ -119,7 +119,7 @@ inline void check_running_panel_current(void)
 inline void check_running_panel_voltage(void)
 {
 #ifdef ADC_ON
-   	control.vi[0] = ma_adc1() * CONVERSION_PANEL_VOLTAGE_VALUE;
+   	control.vi[0] = MA_PANEL_VOLTAGE * CONVERSION_PANEL_VOLTAGE_VALUE;
 #endif
    	/*
     if(control.vi[0] >= MAXIMUM_RUNNING_PANEL_VOLTAGE){		// MAXIMUM_RUNNING_PANEL_VOLTAGE sem valor em #define 
@@ -136,7 +136,7 @@ inline void check_running_panel_voltage(void)
 inline void check_running_battery_voltage(void) // sem panel
 {
 #ifdef ADC_ON
-   	control.vo[0] = ma_adc2() * CONVERSION_BATTERY_VOLTAGE_VALUE;
+   	control.vo[0] = MA_BATTERY_VOLTAGE * CONVERSION_BATTERY_VOLTAGE_VALUE;
 #endif
 	   
    	if(control.vo[0] >= MAXIMUM_BATTERY_VOLTAGE){		// MAXIMUM_RUNNING_PANEL_VOLTAGE sem valor em #define 
@@ -225,12 +225,21 @@ inline void print_control(void)
     VERBOSE_MSG_MACHINE(usart_send_uint16(control.ii[0]));
     VERBOSE_MSG_MACHINE(usart_send_char(' '));
 
+    VERBOSE_MSG_MACHINE(usart_send_uint16(control.ii[1]));
+    VERBOSE_MSG_MACHINE(usart_send_char(' '));
+ 
     VERBOSE_MSG_MACHINE(usart_send_string(" Vp: "));
     VERBOSE_MSG_MACHINE(usart_send_uint16(control.vi[0]));
     VERBOSE_MSG_MACHINE(usart_send_char(' '));
 
+    VERBOSE_MSG_MACHINE(usart_send_uint16(control.vi[1]));
+    VERBOSE_MSG_MACHINE(usart_send_char(' '));
+
     VERBOSE_MSG_MACHINE(usart_send_string(" Vb: "));
     VERBOSE_MSG_MACHINE(usart_send_uint16(control.vo[0]));
+    VERBOSE_MSG_MACHINE(usart_send_char(' '));
+
+    VERBOSE_MSG_MACHINE(usart_send_uint16(control.vo[1]));
     VERBOSE_MSG_MACHINE(usart_send_char(' '));
 
     VERBOSE_MSG_MACHINE(usart_send_string(" Pp: "));
@@ -336,9 +345,16 @@ inline void task_running(void)
     // enable pwm to be computed
     adc_data_ready = 1;
 
+    static uint8_t delay = 0;
+
     if(system_flags.mppt_on && system_flags.enable){
 #ifdef PWM_ON
         pwm_compute();
+        /*if(delay < 50) delay++;
+        else{
+            delay = 0;
+            pwm_compute();
+        }*/
 #endif
     }else{
         set_state_idle();
