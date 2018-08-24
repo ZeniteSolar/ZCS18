@@ -338,13 +338,6 @@ inline void task_running(void)
     }
 #endif
 
-    check_running_panel_current();
-    check_running_panel_voltage();
-	check_running_battery_voltage();
-
-    // enable pwm to be computed
-    adc_data_ready = 1;
-
     static uint8_t delay = 0;
 
     if(system_flags.mppt_on && system_flags.enable){
@@ -423,6 +416,15 @@ inline void machine_run(void)
     #else
     system_flags.enable = system_flags.mppt_on = 1;
 	#endif
+
+    if(adc_data_ready){
+        adc_data_ready = 0;
+        check_running_panel_current();
+        check_running_panel_voltage();
+        check_running_battery_voltage();
+    }
+
+
 
     print_system_flags();
     print_error_flags();

@@ -22,6 +22,8 @@
 
 #define ADC_LAST_CHANNEL 3                  //*< quantity of channels used
 //#define ADC_8BITS
+//
+uint8_t adc_data_ready = 1;
 
 typedef volatile enum adc_channels{ 
     ADC0, ADC1 ,ADC2, ADC3, ADC4, ADC5  

@@ -172,6 +172,7 @@ ISR(ADC_vect){
 			ADC_CHANNEL++;
             //break;
         default:
+            adc_data_ready = 1;
             ADC_CHANNEL = ADC0;             // recycles
             VERBOSE_MSG_ADC(usart_send_string("\n"));
             break;

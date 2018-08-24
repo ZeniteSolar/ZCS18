@@ -58,11 +58,8 @@ inline void pwm_reset(void)
 inline void pwm_compute(void)
 {	
 #ifdef MACHINE_ON
-    if(adc_data_ready){
-	    pertub_and_observe();
-        //adc_data_ready = 0;
-        VERBOSE_MSG_PWM(usart_send_string("PeO. "));
-    }
+    pertub_and_observe();
+    VERBOSE_MSG_PWM(usart_send_string("PeO. "));
 	
 	// treats faults
     if(error_flags.overvoltage || error_flags.overcurrent){
@@ -77,11 +74,8 @@ inline void pwm_compute(void)
     else if(control.D < PWM_D_MIN_THRESHHOLD)   control.D = PWM_D_MIN;
 
     // apply dutycycle
-    if(adc_data_ready){
-        VERBOSE_MSG_PWM(usart_send_string("c.D. "));
-        set_pwm_duty_cycle(control.D);
-        adc_data_ready = 0;
-    }
+    VERBOSE_MSG_PWM(usart_send_string("c.D. "));
+    set_pwm_duty_cycle(control.D);
 
     VERBOSE_MSG_PWM(usart_send_string("PWM computed as: "));
     VERBOSE_MSG_PWM(usart_send_uint16(OCR1A));

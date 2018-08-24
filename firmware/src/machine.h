@@ -146,7 +146,6 @@ uint8_t total_errors;   // Contagem de ERROS
 uint8_t pwm_fault_count;
 uint8_t check_pwm_fault_times;
 uint8_t init_pwm_increment_divider;
-uint8_t adc_data_ready;
 
 // other variables
 uint8_t led_clk_div;
