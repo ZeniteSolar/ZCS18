@@ -43,8 +43,8 @@
 //#define CONVERTER_TEST_WITH_FIXED_DUTYCYCLE_DT_VALUE 0.60*(PWM_TOP)
 //#define PWM_TEST 
  
-#define INITIAL_D                   0               //!< float value from 0 to 1
-#define PWM_FREQUENCY               100000          //! frequency in Hz
+#define INITIAL_D                   0.6f            //!< float value from 0 to 1
+#define PWM_FREQUENCY               100000          //<! pwm frequency in Hz
 #define PWM_D_DELTA                 1               //!< amount to increase (may interfer on threshholds)
 #define PWM_D_MAX_DELTA             1               //!< clock divisor
 #define PWM_D_MIN                   0.01*(PWM_TOP)  //!< minimum D
@@ -56,8 +56,13 @@
 #ifdef CONVERTER_TEST_WITH_FIXED_DUTYCYCLE
 #define PWM_INITIAL_D               CONVERTER_TEST_WITH_FIXED_DUTYCYCLE_DT_VALUE
 #else
-#define PWM_INITIAL_D               0.6f*(PWM_TOP)
+#define PWM_INITIAL_D               (INITIAL_D)*(PWM_TOP)
 #endif
+#define FORCE_VARIATION_OF_D_WHEN_ZERO_POWER_DETECTED
+#define MAX_ZERO_POWER_TIMES        250             //!< 
+#define DYNAMIC_D_STEP_SIZE
+#define PWM_D_MIN_STEP              1
+#define PWM_D_MAX_STEP              (PWM_D_MAX/8)
 
 // number of checks before reset the pwm fault counter.
 #define CHECKS_BEFORE_RESET_FAULT_COUNTER 100

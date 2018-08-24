@@ -338,16 +338,9 @@ inline void task_running(void)
     }
 #endif
 
-    static uint8_t delay = 0;
-
     if(system_flags.mppt_on && system_flags.enable){
 #ifdef PWM_ON
         pwm_compute();
-        /*if(delay < 50) delay++;
-        else{
-            delay = 0;
-            pwm_compute();
-        }*/
 #endif
     }else{
         set_state_idle();
