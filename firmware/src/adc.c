@@ -91,6 +91,7 @@ uint8_t adc_select_channel(adc_channels_t __ch)
  */
 void adc_init(void)
 {
+    adc_data_ready = 0;
     clr_bit(PRR0, PRADC);                           // Activates clock to adc
 
     // configuracao do ADC
