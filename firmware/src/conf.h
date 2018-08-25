@@ -10,6 +10,10 @@
 #ifndef CONF_H
 //#define CONF_H
 
+#ifndef F_CPU
+#define F_CPU 16000000UL    //define a frequencia do microcontrolador - 16MHz
+#endif /* ifndef F_CPU */
+
 // CONFIGURACOES DE COMPILACAO
 //#define DEBUG_ON
 //#define VERBOSE_ON
