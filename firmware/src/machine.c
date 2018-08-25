@@ -66,6 +66,7 @@ inline void read_and_check_adcs(void)
     control.vi[0] = MA_PANEL_VOLTAGE * CONVERSION_PANEL_VOLTAGE_VALUE;
     control.ii[0] = MA_PANEL_CURRENT * CONVERSION_PANEL_CURRENT_VALUE;
     control.vo[0] = MA_BATTERY_VOLTAGE * CONVERSION_BATTERY_VOLTAGE_VALUE;
+    something_changed = 1;
 
     switch(state_machine){
         case STATE_INITIALIZING:
@@ -258,35 +259,55 @@ inline void print_error_flags(void)
 }
  
 /**
-* @brief prints the error flags
+* @brief prints control d infos
 */
-inline void print_control(void)
+inline void print_control_d(void)
 {
     VERBOSE_MSG_MACHINE(usart_send_string(" D: "));
     VERBOSE_MSG_MACHINE(usart_send_uint16(control.D));
     VERBOSE_MSG_MACHINE(usart_send_char(' '));
-    
-    VERBOSE_MSG_MACHINE(usart_send_string(" Ip: "));
-    VERBOSE_MSG_MACHINE(usart_send_uint16(control.ii[0]));
-    VERBOSE_MSG_MACHINE(usart_send_char(' '));
-
-    VERBOSE_MSG_MACHINE(usart_send_uint16(control.ii[1]));
-    VERBOSE_MSG_MACHINE(usart_send_char(' '));
- 
+}
+/**
+* @brief prints control vi infos
+*/
+inline void print_control_vi(void)
+{
     VERBOSE_MSG_MACHINE(usart_send_string(" Vp: "));
     VERBOSE_MSG_MACHINE(usart_send_uint16(control.vi[0]));
     VERBOSE_MSG_MACHINE(usart_send_char(' '));
-
     VERBOSE_MSG_MACHINE(usart_send_uint16(control.vi[1]));
     VERBOSE_MSG_MACHINE(usart_send_char(' '));
-
+}
+ 
+/**
+* @brief prints control ii infos
+*/
+inline void print_control_ii(void)
+{
+    VERBOSE_MSG_MACHINE(usart_send_string(" Ip: "));
+    VERBOSE_MSG_MACHINE(usart_send_uint16(control.ii[0]));
+    VERBOSE_MSG_MACHINE(usart_send_char(' '));
+    VERBOSE_MSG_MACHINE(usart_send_uint16(control.ii[1]));
+    VERBOSE_MSG_MACHINE(usart_send_char(' '));
+} 
+ 
+/**
+* @brief prints control vo infos
+*/
+inline void print_control_vo(void)
+{
     VERBOSE_MSG_MACHINE(usart_send_string(" Vb: "));
     VERBOSE_MSG_MACHINE(usart_send_uint16(control.vo[0]));
     VERBOSE_MSG_MACHINE(usart_send_char(' '));
-
     VERBOSE_MSG_MACHINE(usart_send_uint16(control.vo[1]));
     VERBOSE_MSG_MACHINE(usart_send_char(' '));
+} 
 
+/**
+* @brief prints control vo infos
+*/
+inline void print_control_pi(void)
+{
     VERBOSE_MSG_MACHINE(usart_send_string(" Pp: "));
 #ifdef ADC_8BITS
     VERBOSE_MSG_MACHINE(usart_send_uint16(control.pi[0]));
@@ -299,7 +320,6 @@ inline void print_control(void)
     VERBOSE_MSG_MACHINE(usart_send_uint32(control.pi[1]));
     VERBOSE_MSG_MACHINE(usart_send_char(' ')); 
 #endif
-
 }
 
 /**
@@ -439,6 +459,33 @@ inline void task_error(void)
     set_state_initializing();
 }
 
+void print_infos(void)
+{
+    static uint8_t i = 0;
+    if(something_changed) switch(i++){
+        case 0:
+            print_system_flags();
+            break;
+        case 1:
+            print_error_flags();
+            break;
+        case 2:
+            print_control_d();
+            break;
+        case 3:
+            print_control_vi();
+            break;
+        case 4:
+            print_control_ii();
+            break;
+        case 5:
+            print_control_vo();
+        default:
+            i = 0;
+            something_changed = 0;
+            break;
+    }
+}
 
 /**
  * @brief this is the machine state itself.
@@ -456,9 +503,7 @@ inline void machine_run(void)
         read_and_check_adcs();
     }
 
-    print_system_flags();
-    print_error_flags();
-    print_control();
+    print_infos();
 
     if(machine_clk){
         machine_clk = 0;

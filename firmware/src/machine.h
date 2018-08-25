@@ -122,7 +122,12 @@ void check_buffers(void);
 // debug functions
 void print_system_flags(void);
 void print_error_flags(void);
-void print_control(void);
+void print_infos(void);
+void print_control_d(void);
+void print_control_vi(void);
+void print_control_ii(void);
+void print_control_vo(void);
+void print_control_pi(void);
 
 // machine tasks
 void task_initializing(void);
@@ -144,6 +149,7 @@ system_flags_t system_flags;
 error_flags_t error_flags;
 volatile uint8_t machine_clk;
 uint8_t total_errors;   // Contagem de ERROS
+uint8_t something_changed;
 
 // pwm variables
 uint8_t pwm_fault_count;
