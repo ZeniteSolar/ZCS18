@@ -11,10 +11,6 @@
 #ifndef USART_H
 #define USART_H
 
-#ifndef F_CPU
-#define F_CPU 16000000UL    //define a frequencia do microcontrolador - 16MHz
-#endif /* ifndef F_CPU */
-
 #include <avr/io.h>
 #include "../lib/bit_utils.h"
 #include "conf.h"
