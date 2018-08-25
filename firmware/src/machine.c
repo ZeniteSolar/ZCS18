@@ -56,17 +56,76 @@ inline void check_buffers(void)
     //VERBOSE_MSG_MACHINE(usart_send_string(" \t\tdone.\n")); 
 }
 
+
+/**
+* @brief read and checks current levels
+*/
+inline void read_and_check_adcs(void)
+{ 
+#ifdef ADC_ON
+    control.vi[0] = MA_PANEL_VOLTAGE * CONVERSION_PANEL_VOLTAGE_VALUE;
+    control.ii[0] = MA_PANEL_CURRENT * CONVERSION_PANEL_CURRENT_VALUE;
+    control.vo[0] = MA_BATTERY_VOLTAGE * CONVERSION_BATTERY_VOLTAGE_VALUE;
+
+    switch(state_machine){
+        case STATE_INITIALIZING:
+            check_initializing_panel_voltage();
+            check_initializing_panel_current();
+            check_initializing_battery_voltage();
+
+            break;
+        case STATE_IDLE:
+            check_idle_panel_voltage();
+            check_idle_panel_current();
+            check_idle_battery_voltage();
+
+            break;
+        case STATE_RUNNING:
+            check_running_panel_voltage();
+            check_running_panel_current();
+            check_running_battery_voltage();
+
+            break;
+        default:
+            break;
+    } 
+#endif
+ 
+}
+
+/**
+* @brief checks if the current level is ok for INITIALIZING state
+*/
+inline void check_initializing_panel_current(void)
+{ 
+    //
+}
+
+/**
+ * @brief checks if the voltage level is ok for INITIALIZING state
+ */
+inline void check_initializing_panel_voltage(void)
+{
+    //
+}
+
+/**
+* @brief checks if the voltage of Battery level is ok for INITIALIZING state
+*/
+inline void check_initializing_battery_voltage(void)
+{
+    //
+}
+
+
 /**
  * @brief checks if the current level is ok for IDLE state
  */
 inline void check_idle_panel_current(void)
 { 
-#ifdef ADC_ON
-    control.ii[0] = MA_PANEL_CURRENT * CONVERSION_PANEL_CURRENT_VALUE;
-#endif
 
-	/*if(control.ii[0] >= MAXIMUM_IDLE_PANEL_CURRENT ){		// MAXIMUM_RUNNING_PANEL_VOLTAGE sem valor em #define 
-		error_flags.overcurrent = 1;
+	/*dif(control.ii[0] >= MAXIMUM_IDLE_PANEL_CURRENT ){		// MAXIMUM_RUNNING_PANEL_VOLTAGE sem valor em #define 
+	   d error_flags.overcurrent = 1;
 	}else if(control.ii[0] <= MINIMUM_IDLE_PANEL_CURRENT){
 		error_flags.undercurrent = 1;
 	}else error_flags.overcurrent = 0;*/
@@ -78,9 +137,6 @@ inline void check_idle_panel_current(void)
  */
 inline void check_idle_panel_voltage(void)
 {
-#ifdef ADC_ON
-    control.vi[0] = MA_PANEL_VOLTAGE * CONVERSION_PANEL_VOLTAGE_VALUE;
-#endif
    	/*if(control.vi[0] >= MAXIMUM_IDLE_PANEL_VOLTAGE){
 	   	error_flags.overvolt_panel = 1;
    	}else if(control.vi[0] <= MINIMUM_IDLE_PANEL_VOLTAGE){
@@ -102,10 +158,6 @@ inline void check_idle_battery_voltage(void)
  */
 inline void check_running_panel_current(void)
 {
-#ifdef ADC_ON
-   	control.ii[0] = MA_PANEL_CURRENT * CONVERSION_PANEL_CURRENT_VALUE;
-#endif
-	
     if(control.ii[0] >= MAXIMUM_RUNNING_PANEL_CURRENT ){		// MAXIMUM_RUNNING_PANEL_VOLTAGE sem valor em #define 
 		error_flags.overcurrent = 1;
 	/*}else if(control.ii[0] <= MINIMUM_RUNNING_PANEL_CURRENT){
@@ -118,9 +170,6 @@ inline void check_running_panel_current(void)
  */
 inline void check_running_panel_voltage(void)
 {
-#ifdef ADC_ON
-   	control.vi[0] = MA_PANEL_VOLTAGE * CONVERSION_PANEL_VOLTAGE_VALUE;
-#endif
    	/*
     if(control.vi[0] >= MAXIMUM_RUNNING_PANEL_VOLTAGE){		// MAXIMUM_RUNNING_PANEL_VOLTAGE sem valor em #define 
 	   	error_flags.overvolt_panel = 1;
@@ -135,10 +184,6 @@ inline void check_running_panel_voltage(void)
  */
 inline void check_running_battery_voltage(void) // sem panel
 {
-#ifdef ADC_ON
-   	control.vo[0] = MA_BATTERY_VOLTAGE * CONVERSION_BATTERY_VOLTAGE_VALUE;
-#endif
-	   
    	if(control.vo[0] >= MAXIMUM_BATTERY_VOLTAGE){		// MAXIMUM_RUNNING_PANEL_VOLTAGE sem valor em #define 
 	   	error_flags.overvoltage = 1;
    	/*}else if(control.vo[0] <= MINIMUM_BATTERY_VOLTAGE){
@@ -299,10 +344,6 @@ inline void task_idle(void)
     }        
 #endif
 
-    check_idle_panel_current();
-    check_idle_panel_voltage();
-    check_idle_battery_voltage();
-
 #ifdef PWM_ON
 
     if(system_flags.mppt_on && system_flags.enable){
@@ -405,19 +446,15 @@ inline void task_error(void)
 inline void machine_run(void)
 {
 	#ifdef CAN_ON
-    //can_app_task();
+    can_app_task();
     #else
     system_flags.enable = system_flags.mppt_on = 1;
 	#endif
 
     if(adc_data_ready){
         adc_data_ready = 0;
-        check_running_panel_current();
-        check_running_panel_voltage();
-        check_running_battery_voltage();
+        read_and_check_adcs();
     }
-
-
 
     print_system_flags();
     print_error_flags();
@@ -474,7 +511,7 @@ ISR(INT1_vect) //enable
 */
 ISR(TIMER2_COMPA_vect)
 {
-    //VERBOSE_MSG_ERROR(if(machine_clk) usart_send_string("\nERROR: CLOCK CONFLICT!!!\n"));
+    VERBOSE_MSG_ERROR(if(machine_clk) usart_send_string("\nERROR: CLOCK CONFLICT!!!\n"));
 	machine_clk = 1;
 }
 

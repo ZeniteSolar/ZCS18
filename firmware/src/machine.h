@@ -69,7 +69,7 @@ typedef union system_flags{
         uint8_t     mppt_on         :1;
         uint8_t     enable          :1;
     };
-    uint8_t   all__;
+    uint8_t   all;
 } system_flags_t;
 
 typedef union error_flags{
@@ -106,13 +106,16 @@ typedef struct control{
 control_t control;
 
 // machine checks
+void read_and_check_adcs(void);
+void check_initializing_panel_current(void);
+void check_initializing_panel_voltage(void);
+void check_initializing_battery_voltage(void);
 void check_idle_panel_current(void);
 void check_idle_panel_voltage(void);
 void check_idle_battery_voltage(void);
 void check_running_panel_current(void);
 void check_running_panel_voltage(void);
 void check_running_battery_voltage(void);
-//void check_can(void);         // transfered to can_app.h
 void check_pwm_fault(void);
 void check_buffers(void);
 
