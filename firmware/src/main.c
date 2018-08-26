@@ -86,6 +86,10 @@ int main(void)
 	set_bit(EIMSK, INT0);                       // enables int1 interrupt
 	set_bit(EIFR, INTF0);                       // clears int0 interrupt
 	*/	
+    
+    // reset as input pull-up against noise
+    clr_bit(DDRC, PC6);
+    set_bit(PORTC, PC6);
 	
     sei();
 	
@@ -97,27 +101,22 @@ int main(void)
         #ifdef MACHINE_ON
             machine_run();
         #else
-            cpl_led();
-            _delay_ms(300);
-            cpl_led();
-            _delay_ms(100);
-            cpl_led();
-            _delay_ms(100);
-            cpl_led();
-            _delay_ms(300);
-
-        #ifdef PWM_ON
-            #ifdef PWM_TEST
-                #ifdef CONVERTER_TEST_WITH_FIXED_DUTYCYCLE
-                    set_pwm_duty_cycle(CONVERTER_TEST_WITH_FIXED_DUTYCYCLE_DT_VALUE);
+            #ifdef PWM_ON
+                #ifdef PWM_TEST
+                    #ifdef CONVERTER_TEST_WITH_FIXED_DUTYCYCLE
+                        set_pwm_duty_cycle(CONVERTER_TEST_WITH_FIXED_DUTYCYCLE_DT_VALUE);
+                    #else
+                        static uint8_t i = 0;
+                        set_pwm_duty_cycle(i++);
+                        if(i>PWM_D_MAX) i = PWM_D_MIN;
+                    #endif
                 #else
-                    static uint8_t i = 0;
-                    set_pwm_duty_cycle(i++);
-                    if(i>PWM_D_MAX) i = PWM_D_MIN;
+                    #ifdef PEO_TEST
+                        read_and_check_adcs();
+                        pwm_compute();
+                    #endif
                 #endif
             #endif
-        #endif
-
         #endif
 
 		#ifdef SLEEP_ON

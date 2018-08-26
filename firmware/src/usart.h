@@ -29,6 +29,8 @@ char usart_receive_char(void);
 
 void usart_send_string(const char *s);
 
+void usart_send_uint8(uint8_t num);
+
 void usart_send_uint16(uint16_t num);
 
 void usart_send_uint32(uint32_t num);

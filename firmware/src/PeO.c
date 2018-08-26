@@ -28,10 +28,14 @@ inline void pertub_and_observe(void)
 #ifdef DYNAMIC_D_STEP_SIZE
     int8_t d_step = PWM_D_MIN_STEP +(control.vi[0]/(1+control.ii[0]) >> 6); // 6 is 10% of D_MAX
     if(d_step > PWM_D_MAX_STEP) d_step = PWM_D_MAX_STEP;
+    if(d_step < PWM_D_MIN_STEP) d_step = PWM_D_MIN_STEP;
 #else
     int8_t d_step = PWM_D_MIN_STEP;
 #endif //DYNAMIC_D_STEP_SIZE
  	if(dpi){
+#ifdef FORCE_VARIATION_OF_D_WHEN_ZERO_POWER_DETECTED
+        zero_power_counter = 0;
+#endif  //FORCE_VARIATION_OF_D_WHEN_ZERO_POWER_DETECTED
 		if(dpi < 0){
 		    control.updown ^= 1;
             d_step = (dvi>0)? d_step : -d_step;

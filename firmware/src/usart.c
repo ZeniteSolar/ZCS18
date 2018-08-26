@@ -30,6 +30,32 @@ inline void usart_send_string(const char *s)
 }
 
 /**
+* @brief sends a number in ascii trough serial.
+* The number could be represent with left-filled with a defined FILL char in 
+* a defined BASE. Note that the LEN is 6 because 2^16 have its maximum ascii
+* size represented with 5 chars + '\0' in the end.
+*/
+inline void usart_send_uint8(uint8_t num)
+{
+    #define LEN      4              // length of the string w/ null terminator
+    #define BASE    10              // string as a decimal base
+    #define FILL    '0'             // character to fill non-used algarisms.
+    
+    uint8_t i = LEN -1;             // index for each char of the string
+    char str[LEN] = {FILL};         // ascii zero filled array
+    str[i] = '\0';                  // adds string null terminator
+    while(i--){
+        str[i] = FILL + (num % BASE);// gets each algarism}
+        num /= BASE;                // prepare the next
+    }
+    usart_send_string(str);       // sends the string
+    
+    #undef LEN
+    #undef BASE
+    #undef FILL
+}
+
+/**
  * @brief sends a number in ascii trough serial.
  * The number could be represent with left-filled with a defined FILL char in 
  * a defined BASE. Note that the LEN is 6 because 2^16 have its maximum ascii

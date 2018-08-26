@@ -41,6 +41,12 @@
 #define MA_PANEL_CURRENT        ma_adc1()
 #define MA_BATTERY_VOLTAGE      ma_adc2()
 
+// Equations for mode 2 (CTC with TOP OCR2A)
+// Note the resolution. For example.. at 150hz, ICR1 = PWM_TOP = 159, so it
+//#define QUOTIENT  (((uint32_t)MACHINE_TIMER_PRESCALER)*((uint32_t)MACHINE_TIMER_FREQUENCY))
+//#define MACHINE_TIMER_TOP (0.5*(F_CPU)/QUOTIENT)
+#define MACHINE_TIMER_TOP ((F_CPU)/(2.*((uint32_t)MACHINE_TIMER_PRESCALER)*((uint32_t)MACHINE_TIMER_FREQUENCY)) -1)
+
 #ifdef ADC_ON
 #include "adc.h"
 #endif
@@ -79,7 +85,7 @@ typedef union error_flags{
         uint8_t     overvoltage :1;
 		uint8_t		undervoltage:1;
 		uint8_t		overvolt_panel:1;
-		uint8_t		undervol_panel:1;
+		uint8_t		undervolt_panel:1;
         uint8_t     overheat    :1;
         uint8_t     fault       :1;
         uint8_t     no_canbus   :1;
@@ -123,6 +129,7 @@ void check_buffers(void);
 void print_system_flags(void);
 void print_error_flags(void);
 void print_infos(void);
+void print_control_others(void);
 void print_control_d(void);
 void print_control_vi(void);
 void print_control_ii(void);

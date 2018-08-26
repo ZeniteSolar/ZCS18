@@ -14,6 +14,7 @@
 #define F_CPU 16000000UL    //define a frequencia do microcontrolador - 16MHz
 #endif /* ifndef F_CPU */
 
+
 // CONFIGURACOES DE COMPILACAO
 //#define DEBUG_ON
 //#define VERBOSE_ON
@@ -24,8 +25,6 @@
 #define VERBOSE_ON_INIT
 #define VERBOSE_ON_ERROR
 
-// TESTS
-//#define TEST_PWM
 
 // MODULES ACTIVATION
 #define USART_ON
@@ -35,17 +34,17 @@
 #define MACHINE_ON
 #define PWM_ON
 #define LED_ON
-#define WATCHDOG_ON
+//#define WATCHDOG_ON
 //#define SLEEP_ON
 
- 
 
 // PWM DEFINITIONS
 #ifdef PWM_ON
 // WARNING: DEFINITIONS FOR TEST THE CONVERTER WITH FIXED DUTY CYCLE!!!
 //#define CONVERTER_TEST_WITH_FIXED_DUTYCYCLE
-//#define CONVERTER_TEST_WITH_FIXED_DUTYCYCLE_DT_VALUE 0.60*(PWM_TOP)
+//#define CONVERTER_TEST_WITH_FIXED_DUTYCYCLE_DT_VALUE 0.30*(PWM_TOP)
 //#define PWM_TEST 
+//#define PEO_TEST
  
 #define INITIAL_D                   0.6f            //!< float value from 0 to 1
 #define PWM_FREQUENCY               100000          //<! pwm frequency in Hz
@@ -62,17 +61,27 @@
 #else
 #define PWM_INITIAL_D               (INITIAL_D)*(PWM_TOP)
 #endif
-#define FORCE_VARIATION_OF_D_WHEN_ZERO_POWER_DETECTED
+//#define FORCE_VARIATION_OF_D_WHEN_ZERO_POWER_DETECTED
+#ifdef FORCE_VARIATION_OF_D_WHEN_ZERO_POWER_DETECTED
 #define MAX_ZERO_POWER_TIMES        250             //!< 
-#define DYNAMIC_D_STEP_SIZE
-#define PWM_D_MIN_STEP              1
+#endif
+//#define DYNAMIC_D_STEP_SIZE
+#ifdef DYNAMIC_D_STEP_SIZE
 #define PWM_D_MAX_STEP              (PWM_D_MAX/8)
+#endif
+#define PWM_D_MIN_STEP              1
 
 // number of checks before reset the pwm fault counter.
 #define CHECKS_BEFORE_RESET_FAULT_COUNTER 100
 // maximum of consecutive faults before state an error
 #define FAULT_COUNT_LIMIT           50
 #endif
+
+#ifdef MACHINE_ON
+#define MACHINE_TIMER_FREQUENCY     100         //<! machine timer frequency in Hz
+#define MACHINE_TIMER_PRESCALER     1024        //<! machine timer prescaler
+#endif
+
 
 // INPUT PINS DEFINITIONS
 /*#define     BatOverVoltageInterrupt_PORT PORTD	// <--------- ADICIONADO
@@ -85,6 +94,7 @@
 #define     Enable_DDR              DDRD
 #define     Enable                  PD3
 */
+
 
 // OUTPUT PINS DEFINITIONS
 #ifdef PWM_ON
@@ -107,6 +117,7 @@
 #define     set_led()               
 #define     clr_led()               
 #endif
+
 
 // CANBUS DEFINITONS
 // ----------------------------------------------------------------------------
@@ -131,7 +142,6 @@
  * be 0 all the time.
  */
 #define	SUPPORT_TIMESTAMPS		0
-
 
 
 #endif /* ifndef CONF_H */

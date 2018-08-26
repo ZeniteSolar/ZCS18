@@ -58,16 +58,18 @@ inline void pwm_reset(void)
 inline void pwm_compute(void)
 {	
 #ifdef MACHINE_ON
+
     pertub_and_observe();
+
     VERBOSE_MSG_PWM(usart_send_string("PeO. "));
 	
 	// treats faults
-    if(error_flags.overvoltage || error_flags.overcurrent){
+    /*if(error_flags.overvoltage || error_flags.overcurrent){
         VERBOSE_MSG_PWM(usart_send_string("Err. "));
         error_flags.overvoltage = error_flags.overcurrent = 0;
         if(control.D >= (D_STEP+1))      control.D -= (D_STEP+1);
         else                    control.D = 0;
-    }
+    }*/
 
     // apply some threshhold saturation limits
     if(control.D > PWM_D_MAX_THRESHHOLD)        control.D = PWM_D_MAX;
@@ -97,6 +99,7 @@ inline void pwm_treat_fault(void)
         */
     if(OCR1A > 10)
         OCR1A -= 6;
-    VERBOSE_MSG_PWM(usart_send_string("PWM fault treated\n"));
+    VERBOSE_MSG_PWM(usart_send_string("\nPWM fault treated\n"));
+    VERBOSE_MSG_ERROR(usart_send_string("\nPWM fault treated\n"));
 }
 

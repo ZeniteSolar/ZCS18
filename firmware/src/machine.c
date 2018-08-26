@@ -12,7 +12,7 @@
  */
 void machine_init(void)
 {
-    TCCR2A  =   (1 << WGM21) | (0 << WGM20)         // Timer 2 in Mode 2 = CTC (clear on compar  e)
+    /*TCCR2A  =   (1 << WGM21) | (0 << WGM20)         // Timer 2 in Mode 2 = CTC (clear on compar  e)
             | (0 << COM2A1) | (0 << COM2A0)         // do nothing with OC2A
             | (0 << COM2B1) | (0 << COM2B0);        // do nothing with OC2B
     TCCR2B  =   (0 << WGM22)                        // Timer 0 in Mode 2 = CTC (clear on compar  e)
@@ -22,7 +22,41 @@ void machine_init(void)
             | (1 << CS20);
     OCR2A   =   240; //80                               // Valor para igualdade de comparacao A par  a frequencia de 150 Hz
     TIMSK2 |=   (1 << OCIE2A);                      // Ativa a interrupcao na igualdade de comp  aração do TC2 com OCR2A
-	
+	*/
+
+	clr_bit(PRR0, PRTIM2);                          // Activates clock
+
+    // MODE 2 -> CTC with TOP on OCR1
+    TCCR2A  =    (1 << WGM21) | (0 << WGM20)        // mode 2
+              | (0 << COM2B1) | (0 << COM2B0)       // do nothing
+              | (0 << COM2A1) | (0 << COM2A0);      // do nothing
+
+    //clr_bit(DDRB, PB3); // output for frequency debug
+
+    TCCR2B =
+#if MACHINE_TIMER_PRESCALER ==     1
+                (0 << CS22) | (0 << CS21) | (1 << CS20) // Prescaler N=1
+#elif MACHINE_TIMER_PRESCALER ==   8
+                (0 << CS22) | (1 << CS21) | (0 << CS20) // Prescaler N=8
+#elif MACHINE_TIMER_PRESCALER ==   32
+                (0 << CS22) | (1 << CS21) | (1 << CS20) // Prescaler N=32
+#elif MACHINE_TIMER_PRESCALER ==   64
+                (1 << CS22) | (0 << CS21) | (0 << CS20) // Prescaler N=64
+#elif MACHINE_TIMER_PRESCALER ==   128
+                (1 << CS22) | (0 << CS21) | (1 << CS20) // Prescaler N=128
+#elif MACHINE_TIMER_PRESCALER ==   256
+                (1 << CS22) | (1 << CS21) | (0 << CS20) // Prescaler N=256
+#elif MACHINE_TIMER_PRESCALER ==   1024
+                (1 << CS22) | (1 << CS21) | (1 << CS20) // Prescaler N=1024
+#else
+                0
+#endif
+                | (0 << WGM22);      // mode 2
+
+    OCR2A = MACHINE_TIMER_TOP;                       // OCR2A = TOP = fcpu/(N*2*f) -1
+
+    TIMSK2 |=   (1 << OCIE2A);                      // Activates interruption
+
 } 
 
 /**
@@ -66,7 +100,6 @@ inline void read_and_check_adcs(void)
     control.vi[0] = MA_PANEL_VOLTAGE * CONVERSION_PANEL_VOLTAGE_VALUE;
     control.ii[0] = MA_PANEL_CURRENT * CONVERSION_PANEL_CURRENT_VALUE;
     control.vo[0] = MA_BATTERY_VOLTAGE * CONVERSION_BATTERY_VOLTAGE_VALUE;
-    something_changed = 1;
 
     switch(state_machine){
         case STATE_INITIALIZING:
@@ -237,7 +270,6 @@ inline void print_system_flags(void)
     
     VERBOSE_MSG_MACHINE(usart_send_string(" EN "));
     VERBOSE_MSG_MACHINE(usart_send_char(48+system_flags.enable));
-
 }
 
 /**
@@ -245,25 +277,58 @@ inline void print_system_flags(void)
 */
 inline void print_error_flags(void)
 {
+    /*
     VERBOSE_MSG_MACHINE(usart_send_string("\nOvrI: "));
     VERBOSE_MSG_MACHINE(usart_send_char(48+error_flags.overcurrent));
     
     VERBOSE_MSG_MACHINE(usart_send_string(" OvrV: "));
     VERBOSE_MSG_MACHINE(usart_send_char(48+error_flags.overvoltage));
 
+    VERBOSE_MSG_MACHINE(usart_send_string(" UndV: "));
+    VERBOSE_MSG_MACHINE(usart_send_char(48+error_flags.undervoltage));
+
     VERBOSE_MSG_MACHINE(usart_send_string(" OvrT: "));
     VERBOSE_MSG_MACHINE(usart_send_char(48+error_flags.overheat));
 
+    VERBOSE_MSG_MACHINE(usart_send_string(" F: "));
+    VERBOSE_MSG_MACHINE(usart_send_char(48+error_flags.fault)); 
+
     VERBOSE_MSG_MACHINE(usart_send_string(" NOCAN: "));
     VERBOSE_MSG_MACHINE(usart_send_char(48+error_flags.no_canbus));
+    */
+    VERBOSE_MSG_MACHINE(usart_send_string("\nerrFl: "));
+    VERBOSE_MSG_MACHINE(usart_send_char(48+error_flags.overcurrent));
+    VERBOSE_MSG_MACHINE(usart_send_char(48+error_flags.undercurrent));
+    VERBOSE_MSG_MACHINE(usart_send_char(48+error_flags.overvoltage));
+    VERBOSE_MSG_MACHINE(usart_send_char(48+error_flags.undervoltage));
+    VERBOSE_MSG_MACHINE(usart_send_char(48+error_flags.overvolt_panel));
+    VERBOSE_MSG_MACHINE(usart_send_char(48+error_flags.undervolt_panel));
+    VERBOSE_MSG_MACHINE(usart_send_char(48+error_flags.overheat));
+    VERBOSE_MSG_MACHINE(usart_send_char(48+error_flags.fault));
+    VERBOSE_MSG_MACHINE(usart_send_char(48+error_flags.no_canbus));
+
 }
  
+/**
+* @brief prints control d infos
+*/
+inline void print_control_others(void)
+{
+    VERBOSE_MSG_MACHINE(usart_send_string(" ctrl: "));
+    VERBOSE_MSG_MACHINE(usart_send_uint8(control.mppt_pot_limit));
+    VERBOSE_MSG_MACHINE(usart_send_char(' '));
+    VERBOSE_MSG_MACHINE(usart_send_uint8(control.fault));
+
+}
+
 /**
 * @brief prints control d infos
 */
 inline void print_control_d(void)
 {
     VERBOSE_MSG_MACHINE(usart_send_string(" D: "));
+    VERBOSE_MSG_MACHINE(usart_send_uint8(control.updown));
+    VERBOSE_MSG_MACHINE(usart_send_char(' '));
     VERBOSE_MSG_MACHINE(usart_send_uint16(control.D));
     VERBOSE_MSG_MACHINE(usart_send_char(' '));
 }
@@ -369,7 +434,7 @@ inline void task_idle(void)
     if(system_flags.mppt_on && system_flags.enable){
         if(init_pwm_increment_divider++){
             init_pwm_increment_divider = 0;
-            if(control.D < PWM_INITIAL_D) set_pwm_duty_cycle(control.D++);
+            if(control.D < PWM_INITIAL_D) control.D++;
             else{
                 if(!error_flags.all){
                     VERBOSE_MSG_MACHINE(usart_send_string("Enjoy, the system is at its RUNNING STATE!!\n"));
@@ -381,6 +446,7 @@ inline void task_idle(void)
                 }
             }
         }
+        pwm_compute();
     }
 #endif
 
@@ -462,28 +528,40 @@ inline void task_error(void)
 void print_infos(void)
 {
     static uint8_t i = 0;
-    if(something_changed) switch(i++){
-        case 0:
-            print_system_flags();
-            break;
-        case 1:
-            print_error_flags();
-            break;
-        case 2:
-            print_control_d();
-            break;
-        case 3:
-            print_control_vi();
-            break;
-        case 4:
-            print_control_ii();
-            break;
-        case 5:
-            print_control_vo();
-        default:
-            i = 0;
-            something_changed = 0;
-            break;
+
+    if(something_changed){
+        switch(i++){
+            case 0:
+                print_system_flags();
+                break;
+            case 1:
+                print_error_flags();
+                break;
+            case 2:
+                print_control_d();
+                break;
+            case 3:
+                print_control_vi();
+                break;
+            case 4:
+                print_control_ii();
+                break;
+            case 5:
+                print_control_vo();
+                break;
+            case 6:
+                print_control_pi();
+                break;
+            case 7:
+                print_control_others(); 
+            default:
+                if(something_changed){
+                    something_changed = 0;
+                }
+                break;
+        }
+    }else{
+        i = 0;   
     }
 }
 
@@ -498,33 +576,42 @@ inline void machine_run(void)
     system_flags.enable = system_flags.mppt_on = 1;
 	#endif
 
-    if(adc_data_ready){
-        adc_data_ready = 0;
-        read_and_check_adcs();
-    }
+#define MACHINE_CLK_DIVIDER_VALUE           10
+    static uint8_t machine_clk_divider = 0;
 
     print_infos();
 
     if(machine_clk){
         machine_clk = 0;
-        switch(state_machine){
-            case STATE_INITIALIZING:
-                task_initializing();
+        if(machine_clk_divider++ == MACHINE_CLK_DIVIDER_VALUE){
+            machine_clk_divider = 0;
 
-                break;
-            case STATE_IDLE:
-                task_idle();
+            if(adc_data_ready){
+                adc_data_ready = 0;
+                read_and_check_adcs();
+            } 
 
-                break;
-            case STATE_RUNNING:
-                task_running();
+            something_changed = 1;
 
-                break;
-            case STATE_ERROR:
-                task_error();
+            switch(state_machine){
+                case STATE_INITIALIZING:
+                    task_initializing();
 
-            default:
-                break;
+                    break;
+                case STATE_IDLE:
+                    task_idle();
+
+                    break;
+                case STATE_RUNNING:
+                    task_running();
+
+                    break;
+                case STATE_ERROR:
+                    task_error();
+
+                default:
+                    break;
+            }
         }
     }
 }

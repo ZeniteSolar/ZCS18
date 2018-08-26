@@ -38,7 +38,7 @@
 
 // Equations for mode 14 (Fast PWM with TOP in ICR1)
 // Note the resolution. For example.. at 100Khz, ICR1 = PWM_TOP = 159, so it has 7.3 bits of resolution.
-#define PWM_TOP ((F_CPU)/((PWM_PRESCALE)*(PWM_FREQUENCY)) -1)
+#define PWM_TOP ((F_CPU)/(((uint32_t)PWM_PRESCALE)*((uint32_t)PWM_FREQUENCY)) -1)
 #define PWM_RESOLUTION log10(PWM_TOP +1)/log10(2)
 
 // // pwm macros
