@@ -24,6 +24,8 @@
 //#define ADC_8BITS
 //
 uint8_t adc_data_ready;
+uint16_t avg_sum_samples;
+void calc_avg(void);
 
 typedef volatile enum adc_channels{ 
     ADC0, ADC1 ,ADC2, ADC3, ADC4, ADC5  
@@ -37,8 +39,8 @@ void adc_init(void);
 //
 void init_buffers(void);
 
-#define cbuf_adc0_SIZE          64      // size of buffers
-#define cbuf_adc0_SIZE_2        6       // size of buffers in 2^n
+#define cbuf_adc0_SIZE          2      // size of buffers
+#define cbuf_adc0_SIZE_2        1       // size of buffers in 2^n
 volatile struct cbuf_adc0{
     uint8_t     m_getIdx;
     uint8_t     m_putIdx;
@@ -50,15 +52,19 @@ volatile struct cbuf_adc0{
 
 } cbuf_adc0;
 #ifdef ADC_8BITS
-uint8_t ma_adc0(void);
+uint8_t calc_ma_adc0(void);
+uint8_t ma_adc0;
+uint16_t ma_adc0_sum;
 uint8_t avg_adc0;
 #else
-uint16_t ma_adc0(void);
+uint16_t calc_ma_adc0(void);
+uint16_t ma_adc0;
+uint32_t ma_adc0_sum;
 uint16_t avg_adc0;
 #endif
 
-#define cbuf_adc1_SIZE          64      // size of buffers
-#define cbuf_adc1_SIZE_2        6       // size of buffers in 2^n
+#define cbuf_adc1_SIZE          2      // size of buffers
+#define cbuf_adc1_SIZE_2        1       // size of buffers in 2^n
 volatile struct cbuf_adc1{
     uint8_t     m_getIdx;
     uint8_t     m_putIdx;
@@ -69,15 +75,19 @@ volatile struct cbuf_adc1{
 #endif
 } cbuf_adc1; 
 #ifdef ADC_8BITS
-uint8_t ma_adc1(void);
+uint8_t calc_ma_adc1(void);
+uint8_t ma_adc1;
+uint16_t ma_adc1_sum;
 uint8_t avg_adc1;
 #else
-uint16_t ma_adc1(void);
+uint16_t calc_ma_adc1(void);
+uint16_t ma_adc1;
+uint32_t ma_adc1_sum;
 uint16_t avg_adc1;
 #endif
 
-#define cbuf_adc2_SIZE          64      // size of buffers
-#define cbuf_adc2_SIZE_2        6       // size of buffers in 2^n
+#define cbuf_adc2_SIZE          2      // size of buffers
+#define cbuf_adc2_SIZE_2        1       // size of buffers in 2^n
 volatile struct cbuf_adc2{
     uint8_t     m_getIdx;
     uint8_t     m_putIdx;
@@ -88,10 +98,14 @@ volatile struct cbuf_adc2{
 #endif
 } cbuf_adc2;  
 #ifdef ADC_8BITS
-uint8_t ma_adc2(void);
+uint8_t calc_ma_adc2(void);
+uint8_t ma_adc2;
+uint16_t ma_adc2_sum;
 uint8_t avg_adc2;
 #else
-uint16_t ma_adc2(void);
+uint16_t calc_ma_adc2(void);
+uint16_t ma_adc2;
+uint32_t ma_adc2_sum;
 uint16_t avg_adc2;
 #endif
 

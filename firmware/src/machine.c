@@ -97,9 +97,10 @@ inline void check_buffers(void)
 inline void read_and_check_adcs(void)
 { 
 #ifdef ADC_ON
-    control.vi[0] = MA_PANEL_VOLTAGE * CONVERSION_PANEL_VOLTAGE_VALUE;
-    control.ii[0] = MA_PANEL_CURRENT * CONVERSION_PANEL_CURRENT_VALUE;
-    control.vo[0] = MA_BATTERY_VOLTAGE * CONVERSION_BATTERY_VOLTAGE_VALUE;
+    calc_avg();
+    control.vi[0] = AVG_PANEL_VOLTAGE * CONVERSION_PANEL_VOLTAGE_VALUE;
+    control.ii[0] = AVG_PANEL_CURRENT * CONVERSION_PANEL_CURRENT_VALUE;
+    control.vo[0] = AVG_BATTERY_VOLTAGE * CONVERSION_BATTERY_VOLTAGE_VALUE;
 
     switch(state_machine){
         case STATE_INITIALIZING:

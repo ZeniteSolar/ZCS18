@@ -18,17 +18,17 @@ void init_buffers(void)
  *
  */
 #ifdef ADC_8BITS
-uint8_t ma_adc0(void)
+inline uint8_t calc_ma_adc0(void)
 #else
-uint16_t ma_adc0(void)
+inline uint16_t calc_ma_adc0(void)
 #endif
 {   
     uint16_t sum = 0;
     for(uint8_t i = cbuf_adc0_SIZE; i; i--){
         sum += CBUF_Get(cbuf_adc0, i);
     }
-    avg_adc0 = sum >> cbuf_adc0_SIZE_2;
-    return avg_adc0;
+    ma_adc0 = sum >> cbuf_adc0_SIZE_2;
+    return ma_adc0;
 }
 
 /**
@@ -39,17 +39,17 @@ uint16_t ma_adc0(void)
 *
 */
 #ifdef ADC_8BITS
-uint8_t ma_adc1(void)
+inline uint8_t calc_ma_adc1(void)
 #else
-uint16_t ma_adc1(void)
+inline uint16_t calc_ma_adc1(void)
 #endif
 {   
     uint16_t sum = 0;
     for(uint8_t i = cbuf_adc1_SIZE; i; i--){
         sum += CBUF_Get(cbuf_adc1, i);
     }
-    avg_adc1 = sum >> cbuf_adc1_SIZE_2;
-    return avg_adc1;
+    ma_adc1 = sum >> cbuf_adc1_SIZE_2;
+    return ma_adc1;
 }
 
 /**
@@ -60,17 +60,17 @@ uint16_t ma_adc1(void)
 *
 */
 #ifdef ADC_8BITS
-uint8_t ma_adc2(void)
+inline uint8_t calc_ma_adc2(void)
 #else
-uint16_t ma_adc2(void)
+inline uint16_t calc_ma_adc2(void)
 #endif 
 {   
     uint16_t sum = 0;
     for(uint8_t i = cbuf_adc2_SIZE; i; i--){
         sum += CBUF_Get(cbuf_adc2, i);
     }
-    avg_adc2 = sum >> cbuf_adc2_SIZE_2;
-    return avg_adc2;
+    ma_adc2 = sum >> cbuf_adc2_SIZE_2;
+    return ma_adc2;
 }
 
 /**
@@ -78,7 +78,7 @@ uint16_t ma_adc2(void)
  * @param __ch is the channel to be switched to
  * @return return the selected channel
  */
-uint8_t adc_select_channel(adc_channels_t __ch)
+inline uint8_t adc_select_channel(adc_channels_t __ch)
 {
     if(__ch < ADC_LAST_CHANNEL ) ADC_CHANNEL = __ch;
 
@@ -140,6 +140,19 @@ void adc_init(void)
 
 }
 
+
+/**
+ * @brief executes a simple average
+ */
+inline void calc_avg(void)
+{
+    avg_adc0 = ma_adc0_sum / avg_sum_samples;
+    avg_adc1 = ma_adc1_sum / avg_sum_samples;
+    avg_adc2 = ma_adc2_sum / avg_sum_samples;
+    ma_adc0_sum = ma_adc1_sum = ma_adc2_sum = avg_sum_samples = 0;
+}
+
+
 /**
  * @brief MUX do ADC
  */
@@ -152,6 +165,8 @@ ISR(ADC_vect){
 #else
             CBUF_Push(cbuf_adc0, ADC); 
 #endif
+            calc_ma_adc0();
+            ma_adc0_sum += ma_adc0;
             ADC_CHANNEL++;
             break;
         case ADC1:
@@ -161,6 +176,8 @@ ISR(ADC_vect){
 #else
             CBUF_Push(cbuf_adc1, ADC); 
 #endif
+            calc_ma_adc1();
+            ma_adc1_sum += ma_adc1;
             ADC_CHANNEL++;
             break;
         case ADC2:
@@ -170,9 +187,12 @@ ISR(ADC_vect){
 #else
             CBUF_Push(cbuf_adc2, ADC);
 #endif
+            calc_ma_adc2();
+            ma_adc2_sum += ma_adc2;
 			ADC_CHANNEL++;
             //break;
         default:
+            avg_sum_samples++;
             adc_data_ready = 1;
             ADC_CHANNEL = ADC0;             // recycles
             VERBOSE_MSG_ADC(usart_send_string("\n"));

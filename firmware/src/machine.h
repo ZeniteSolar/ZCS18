@@ -37,9 +37,9 @@
 #define ADC_PANEL_CURRENT       adc1
 #define ADC_BATTERY_VOLTAGE     adc2
 
-#define MA_PANEL_VOLTAGE        ma_adc0()
-#define MA_PANEL_CURRENT        ma_adc1()
-#define MA_BATTERY_VOLTAGE      ma_adc2()
+#define AVG_PANEL_VOLTAGE        avg_adc0
+#define AVG_PANEL_CURRENT        avg_adc1
+#define AVG_BATTERY_VOLTAGE      avg_adc2
 
 // Equations for mode 2 (CTC with TOP OCR2A)
 // Note the resolution. For example.. at 150hz, ICR1 = PWM_TOP = 159, so it

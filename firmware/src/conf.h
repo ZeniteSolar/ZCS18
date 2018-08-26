@@ -50,7 +50,7 @@
 #define PWM_FREQUENCY               100000          //<! pwm frequency in Hz
 #define PWM_D_DELTA                 1               //!< amount to increase (may interfer on threshholds)
 #define PWM_D_MAX_DELTA             1               //!< clock divisor
-#define PWM_D_MIN                   0.01*(PWM_TOP)  //!< minimum D
+#define PWM_D_MIN                   0.3*(PWM_TOP)  //!< minimum D
 #define PWM_D_MAX                   0.9*(PWM_TOP)   //!< maximum D
 #define PWM_D_MIN_THRESHHOLD        PWM_D_MIN       //!< minimum D threshhold
 #define PWM_D_MAX_THRESHHOLD        PWM_D_MAX       //!< maximum D threshhold
