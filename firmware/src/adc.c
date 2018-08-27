@@ -111,7 +111,7 @@ void adc_init(void)
             | (1 << ADTS1)
             | (1 << ADTS0);
 
-    adc_select_channel(ADC1);                       // Choose admux
+    adc_select_channel(ADC0);                       // Choose admux
     ADCSRA  =   (1 << ADATE)                        // ADC Auto Trigger Enable
             | (1 << ADIE)                           // ADC Interrupt Enable
             | (1 << ADEN)                           // ADC Enable
@@ -131,9 +131,9 @@ void adc_init(void)
             | (0 << COM0A1) | (0 << COM0A0);        // Normal port operation
     TCCR0B  =   (0 << WGM02)                        // Timer 0 in Mode 2 = CTC (clear on compare)
             | (0 << FOC0A) | (0 << FOC0B)           // dont force outputs
-            | (0 << CS02) | (1 << CS01) | (0 << CS00); // clock enabled, prescaller = 64
+            | (1 << CS02) | (0 << CS01) | (0 << CS00); // clock enabled, prescaller = 64
 
-	OCR0A  =    199;                                 // Valor para igualdade de comparacao A para frequencia de 5kHz
+	OCR0A  =    20;                                 // Valor para igualdade de comparacao A para frequencia de 5kHz
     TIMSK0 |=   (1 << OCIE0A);                      // Ativa a interrupcao na igualdade de comparação do TC0 com OCR0A
 
     init_buffers();

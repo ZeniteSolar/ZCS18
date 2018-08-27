@@ -12,18 +12,6 @@
  */
 void machine_init(void)
 {
-    /*TCCR2A  =   (1 << WGM21) | (0 << WGM20)         // Timer 2 in Mode 2 = CTC (clear on compar  e)
-            | (0 << COM2A1) | (0 << COM2A0)         // do nothing with OC2A
-            | (0 << COM2B1) | (0 << COM2B0);        // do nothing with OC2B
-    TCCR2B  =   (0 << WGM22)                        // Timer 0 in Mode 2 = CTC (clear on compar  e)
-            | (0 << FOC0A) | (0 << FOC0B)           // dont force outputs
-            | (1 << CS22)                           // clock enabled, prescaller = 1024
-            | (1 << CS21)
-            | (1 << CS20);
-    OCR2A   =   240; //80                               // Valor para igualdade de comparacao A par  a frequencia de 150 Hz
-    TIMSK2 |=   (1 << OCIE2A);                      // Ativa a interrupcao na igualdade de comp  aração do TC2 com OCR2A
-	*/
-
 	clr_bit(PRR0, PRTIM2);                          // Activates clock
 
     // MODE 2 -> CTC with TOP on OCR1
@@ -297,7 +285,7 @@ inline void print_error_flags(void)
     VERBOSE_MSG_MACHINE(usart_send_string(" NOCAN: "));
     VERBOSE_MSG_MACHINE(usart_send_char(48+error_flags.no_canbus));
     */
-    VERBOSE_MSG_MACHINE(usart_send_string("\nerrFl: "));
+    VERBOSE_MSG_MACHINE(usart_send_string("errFl: "));
     VERBOSE_MSG_MACHINE(usart_send_char(48+error_flags.overcurrent));
     VERBOSE_MSG_MACHINE(usart_send_char(48+error_flags.undercurrent));
     VERBOSE_MSG_MACHINE(usart_send_char(48+error_flags.overvoltage));
@@ -344,6 +332,15 @@ inline void print_control_vi(void)
     VERBOSE_MSG_MACHINE(usart_send_uint16(control.vi[1]));
     VERBOSE_MSG_MACHINE(usart_send_char(' '));
 }
+
+/**
+* @brief prints control dvi infos
+*/
+inline void print_control_dvi(void)
+{
+    VERBOSE_MSG_MACHINE(usart_send_int32(control.dvi));
+    VERBOSE_MSG_MACHINE(usart_send_char(' '));
+}
  
 /**
 * @brief prints control ii infos
@@ -356,6 +353,16 @@ inline void print_control_ii(void)
     VERBOSE_MSG_MACHINE(usart_send_uint16(control.ii[1]));
     VERBOSE_MSG_MACHINE(usart_send_char(' '));
 } 
+
+/**
+* @brief prints control dii infos
+*/
+inline void print_control_dii(void)
+{
+    VERBOSE_MSG_MACHINE(usart_send_int32(control.dii));
+    VERBOSE_MSG_MACHINE(usart_send_char(' '));
+}
+ 
  
 /**
 * @brief prints control vo infos
@@ -368,6 +375,16 @@ inline void print_control_vo(void)
     VERBOSE_MSG_MACHINE(usart_send_uint16(control.vo[1]));
     VERBOSE_MSG_MACHINE(usart_send_char(' '));
 } 
+
+/**
+* @brief prints control dvo infos
+*/
+inline void print_control_dvo(void)
+{
+    VERBOSE_MSG_MACHINE(usart_send_int32(control.dvo));
+    VERBOSE_MSG_MACHINE(usart_send_char(' '));
+}
+ 
 
 /**
 * @brief prints control vo infos
@@ -389,6 +406,16 @@ inline void print_control_pi(void)
 }
 
 /**
+* @brief prints control dpi infos
+*/
+inline void print_control_dpi(void)
+{
+    VERBOSE_MSG_MACHINE(usart_send_int32(control.dpi));
+    VERBOSE_MSG_MACHINE(usart_send_char(' '));
+}
+ 
+
+/**
  * @brief Checks if the system is OK to run:
  *  - all ring_buffers needed to be full
  *  - checks the current
@@ -406,9 +433,6 @@ inline void task_initializing(void)
     pwm_fault_count = 0;
 
     check_buffers();
-    check_idle_panel_current();
-    check_idle_panel_voltage();
-    check_idle_battery_voltage();
     
     VERBOSE_MSG_INIT(usart_send_string("System initialized without errors.\n"));
     set_state_idle();
@@ -431,7 +455,7 @@ inline void task_idle(void)
 #endif
 
 #ifdef PWM_ON
-
+    /*
     if(system_flags.mppt_on && system_flags.enable){
         if(init_pwm_increment_divider++){
             init_pwm_increment_divider = 0;
@@ -448,8 +472,9 @@ inline void task_idle(void)
             }
         }
         pwm_compute();
-    }
+    }*/
 #endif
+    set_state_running();
 
 }
 
@@ -533,10 +558,10 @@ void print_infos(void)
     if(something_changed){
         switch(i++){
             case 0:
-                print_system_flags();
+                //print_system_flags();
                 break;
             case 1:
-                print_error_flags();
+                //print_error_flags();
                 break;
             case 2:
                 print_control_d();
@@ -545,17 +570,30 @@ void print_infos(void)
                 print_control_vi();
                 break;
             case 4:
-                print_control_ii();
+                print_control_dvi();
                 break;
             case 5:
-                print_control_vo();
+                print_control_ii();
                 break;
             case 6:
-                print_control_pi();
+                //print_control_dii();
                 break;
             case 7:
-                print_control_others(); 
+                print_control_vo();
+                break;
+            case 8:
+                //print_control_dvo();
+                break;
+            case 9:
+                print_control_pi();
+                break;
+            case 10:
+                print_control_dpi();
+                break;
+            case 11:
+                //print_control_others(); 
             default:
+                VERBOSE_MSG_MACHINE(usart_send_char('\n'));
                 if(something_changed){
                     something_changed = 0;
                 }
@@ -577,7 +615,7 @@ inline void machine_run(void)
     system_flags.enable = system_flags.mppt_on = 1;
 	#endif
 
-#define MACHINE_CLK_DIVIDER_VALUE           10
+#define MACHINE_CLK_DIVIDER_VALUE           20
     static uint8_t machine_clk_divider = 0;
 
     print_infos();

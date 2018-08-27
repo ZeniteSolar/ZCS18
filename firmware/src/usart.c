@@ -55,6 +55,34 @@ inline void usart_send_uint8(uint8_t num)
     #undef FILL
 }
 
+inline void usart_send_int8(int8_t num)
+{
+    #define LEN     4              // length of the string w/ null terminator
+    #define BASE    10              // string as a decimal base
+    #define FILL    '0'             // character to fill non-used algarisms.
+    
+    uint8_t i = LEN -1;             // index for each char of the string
+    char str[LEN] = {FILL};         // ascii zero filled array
+
+    if(num < 0){
+        str[0] = '-';
+        num = -num;
+    }else{
+        str[0] = '+';
+    }
+
+    str[i] = '\0';                  // adds string null terminator
+    while(i--){
+        str[i] = FILL + (num % BASE);// gets each algarism}
+        num /= BASE;                // prepare the next
+    }
+    usart_send_string(str);         // sends the string
+    
+    #undef LEN
+    #undef BASE
+    #undef FILL    
+}
+
 /**
  * @brief sends a number in ascii trough serial.
  * The number could be represent with left-filled with a defined FILL char in 
@@ -81,6 +109,34 @@ inline void usart_send_uint16(uint16_t num)
     #undef FILL
 }
 
+inline void usart_send_int16(int16_t num)
+{
+    #define LEN     7              // length of the string w/ null terminator
+    #define BASE    10              // string as a decimal base
+    #define FILL    '0'             // character to fill non-used algarisms.
+    
+    uint8_t i = LEN -1;             // index for each char of the string
+    char str[LEN] = {FILL};         // ascii zero filled array
+
+    if(num < 0){
+        str[0] = '-';
+        num = -num;
+    }else{
+        str[0] = '+';
+    }
+
+    str[i] = '\0';                  // adds string null terminator
+    while(i--){
+        str[i] = FILL + (num % BASE);// gets each algarism}
+        num /= BASE;                // prepare the next
+    }
+    usart_send_string(str);         // sends the string
+    
+    #undef LEN
+    #undef BASE
+    #undef FILL    
+}
+
 /**
  * @brief sends a number in ascii trough serial.
  * The number could be represent with left-filled with a defined FILL char in 
@@ -105,6 +161,36 @@ inline void usart_send_uint32(uint32_t num)
     #undef LEN
     #undef BASE
     #undef FILL
+}
+
+inline void usart_send_int32(int32_t num)
+{
+    #define LEN     12              // length of the string w/ null terminator
+    #define BASE    10              // string as a decimal base
+    #define FILL    '0'             // character to fill non-used algarisms.
+    
+    uint8_t i = LEN -1;             // index for each char of the string
+    char str[LEN] = {FILL};         // ascii zero filled array
+    char sign = ' ';
+
+    if(num < 0){
+        sign = '-';
+        num = -num;
+    }
+
+    str[i] = '\0';                  // adds string null terminator
+    while(i--){
+        str[i] = FILL + (num % BASE);// gets each algarism}
+        num /= BASE;                // prepare the next
+    }
+
+    str[0] = sign;
+
+    usart_send_string(str);         // sends the string
+    
+    #undef LEN
+    #undef BASE
+    #undef FILL    
 }
  
 /**

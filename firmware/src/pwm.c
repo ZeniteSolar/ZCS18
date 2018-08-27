@@ -34,6 +34,8 @@ void pwm_init()
     OCR1A = INITIAL_D;                              // set initial Duty Cycle
     set_bit(PWM_DDR, PWM);                          // PWM as output
 
+    sweep_completed = 0;
+
 #endif
 }
 
@@ -50,6 +52,61 @@ inline void pwm_reset(void)
     VERBOSE_MSG_PWM(usart_send_string("PWM turned off!\n"));
 }
 
+inline void sweep(void)
+{
+
+    static uint8_t updown = 0;
+    static uint8_t periods = 1;
+    static uint8_t last_up = 0;
+
+    if(control.pi[0] > control.mppt_pi){
+        control.mppt_pi = control.pi[0];
+        control.mppt_vi = control.vi[0];
+        control.mppt_ii = control.ii[0];
+        control.mppt_vo = control.vo[0];
+        control.mppt_D = control.D;
+    }
+
+    if(updown){
+        if(control.D > PWM_D_MIN){
+            control.D -= PWM_D_MIN_STEP;
+        }else{
+            updown ^= 1;
+            periods--;
+        }
+    }else{
+        if(control.D < PWM_D_MAX-PWM_D_MIN_STEP){
+            control.D += PWM_D_MIN_STEP;
+        }else{
+            updown ^= 1;
+        }
+    }
+    if(periods == 0){
+        last_up = 1;
+        
+    }
+
+    if(last_up){
+        if(control.D < PWM_INITIAL_D){
+            control.D += PWM_D_MIN_STEP;
+        }else{
+            sweep_completed = 1;
+        }
+    }
+    if(sweep_completed){
+        VERBOSE_MSG_MACHINE(usart_send_string("\n\nGOT MPPT point: "));
+        VERBOSE_MSG_MACHINE(usart_send_uint32(control.mppt_pi));
+        VERBOSE_MSG_MACHINE(usart_send_char(' '));
+        VERBOSE_MSG_MACHINE(usart_send_uint16(control.mppt_vi));
+        VERBOSE_MSG_MACHINE(usart_send_char(' '));
+        VERBOSE_MSG_MACHINE(usart_send_uint16(control.mppt_ii));
+        VERBOSE_MSG_MACHINE(usart_send_char(' '));
+        VERBOSE_MSG_MACHINE(usart_send_uint8(control.mppt_D)); 
+        VERBOSE_MSG_MACHINE(usart_send_char('\n'));
+
+    }
+
+}
 
 /**
  * @brief computs duty-cycle for PWM
@@ -59,7 +116,11 @@ inline void pwm_compute(void)
 {	
 #ifdef MACHINE_ON
 
-    pertub_and_observe();
+    if(sweep_completed){
+        pertub_and_observe();
+    }else{
+        sweep();
+    }
 
     VERBOSE_MSG_PWM(usart_send_string("PeO. "));
 	
@@ -97,9 +158,11 @@ inline void pwm_treat_fault(void)
         control.D_raw_target -= 6;      // -10%
 #endif
         */
+    /*
     if(OCR1A > 10)
         OCR1A -= 6;
     VERBOSE_MSG_PWM(usart_send_string("\nPWM fault treated\n"));
     VERBOSE_MSG_ERROR(usart_send_string("\nPWM fault treated\n"));
+    */
 }
 

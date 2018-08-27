@@ -46,11 +46,11 @@
 //#define PWM_TEST 
 //#define PEO_TEST
  
-#define INITIAL_D                   0.6f            //!< float value from 0 to 1
+#define INITIAL_D                   0.8f            //!< float value from 0 to 1
 #define PWM_FREQUENCY               100000          //<! pwm frequency in Hz
 #define PWM_D_DELTA                 1               //!< amount to increase (may interfer on threshholds)
 #define PWM_D_MAX_DELTA             1               //!< clock divisor
-#define PWM_D_MIN                   0.3*(PWM_TOP)  //!< minimum D
+#define PWM_D_MIN                   0.35*(PWM_TOP)  //!< minimum D
 #define PWM_D_MAX                   0.9*(PWM_TOP)   //!< maximum D
 #define PWM_D_MIN_THRESHHOLD        PWM_D_MIN       //!< minimum D threshhold
 #define PWM_D_MAX_THRESHHOLD        PWM_D_MAX       //!< maximum D threshhold
@@ -61,13 +61,13 @@
 #else
 #define PWM_INITIAL_D               (INITIAL_D)*(PWM_TOP)
 #endif
-//#define FORCE_VARIATION_OF_D_WHEN_ZERO_POWER_DETECTED
+#define FORCE_VARIATION_OF_D_WHEN_ZERO_POWER_DETECTED
 #ifdef FORCE_VARIATION_OF_D_WHEN_ZERO_POWER_DETECTED
-#define MAX_ZERO_POWER_TIMES        250             //!< 
+#define MAX_ZERO_POWER_TIMES        10             //!< 
 #endif
-//#define DYNAMIC_D_STEP_SIZE
+#define DYNAMIC_D_STEP_SIZE
 #ifdef DYNAMIC_D_STEP_SIZE
-#define PWM_D_MAX_STEP              (PWM_D_MAX/8)
+#define PWM_D_MAX_STEP              (PWM_D_MAX/2)
 #endif
 #define PWM_D_MIN_STEP              1
 

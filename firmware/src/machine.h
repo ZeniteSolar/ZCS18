@@ -101,10 +101,21 @@ typedef struct control{
     uint16_t    ii[2];          // value of panel current in AMPS
     uint16_t    vi[2];          // value of panel voltage in VOLTS
 	uint16_t	vo[2];		    // value of battery voltage in VOLTS
+	int16_t	    dvi;		    // value of delta panel voltage in VOLTS
+	int16_t	    dii;		    // value of delta panel current in AMPS
+	int16_t	    dvo;		    // value of delta battery voltage in VOLTS
+    uint16_t     mppt_vi;
+    uint16_t     mppt_ii;
+    uint16_t     mppt_vo;
+    uint8_t     mppt_D;
 #ifdef ADC_8BITS
 	uint16_t	pi[2];			// value of power in WATTS
+	int16_t	    dpi;			// value of delta power in WATTS
+    uint16_t     mppt_pi;
 #else
 	uint32_t	pi[2];			// value of power in WATTS
+	int32_t	    dpi;			// value of delta power in WATTS
+    uint32_t     mppt_pi;
 #endif
 
 }control_t;
@@ -132,9 +143,13 @@ void print_infos(void);
 void print_control_others(void);
 void print_control_d(void);
 void print_control_vi(void);
+void print_control_dvi(void);
 void print_control_ii(void);
+void print_control_dii(void);
 void print_control_vo(void);
+void print_control_dvo(void);
 void print_control_pi(void);
+void print_control_dpi(void);
 
 // machine tasks
 void task_initializing(void);
