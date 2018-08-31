@@ -31,7 +31,7 @@ void pwm_init()
             | (1 << WGM13) | (1 << WGM12);          // mode 14
     
     ICR1 = PWM_TOP;                                 // ICR1 = TOP = fcpu/(N*f) -1
-    OCR1A = INITIAL_D;                              // set initial Duty Cycle
+    OCR1A = PWM_D_INITIAL;                              // set initial Duty Cycle
     set_bit(PWM_DDR, PWM);                          // PWM as output
 
     sweep_completed = 0;
@@ -43,7 +43,6 @@ void pwm_init()
  * @brief reset pwm and its control buffers.
  */
 inline void pwm_reset(void)
-#include <util/delay.h>
 {
     set_pwm_off();
 #ifdef MACHINE_ON
@@ -59,12 +58,11 @@ inline void sweep(void)
     static uint8_t periods = 1;
     static uint8_t last_up = 0;
 
-    if(control.pi[0] > control.mppt_pi){
-        control.mppt_pi = control.pi[0];
-        control.mppt_vi = control.vi[0];
-        control.mppt_ii = control.ii[0];
-        control.mppt_vo = control.vo[0];
-        control.mppt_D = control.D;
+    if(control.pi[0] > control.mpp_pi){
+        control.mpp_pi = control.pi[0];
+        control.mpp_vi = control.vi[0];
+        control.mpp_ii = control.ii[0];
+        control.mpp_D = control.D;
     }
 
     if(updown){
@@ -81,27 +79,25 @@ inline void sweep(void)
             updown ^= 1;
         }
     }
-    if(periods == 0){
-        last_up = 1;
-        
-    }
+    if(periods == 0)    last_up = 1;
 
     if(last_up){
-        if(control.D < PWM_INITIAL_D){
+        if(control.D < PWM_D_INITIAL){
             control.D += PWM_D_MIN_STEP;
         }else{
             sweep_completed = 1;
+            control.D = control.mpp_D;
         }
     }
     if(sweep_completed){
         VERBOSE_MSG_MACHINE(usart_send_string("\n\nGOT MPPT point: "));
-        VERBOSE_MSG_MACHINE(usart_send_uint32(control.mppt_pi));
+        VERBOSE_MSG_MACHINE(usart_send_uint32(control.mpp_pi));
         VERBOSE_MSG_MACHINE(usart_send_char(' '));
-        VERBOSE_MSG_MACHINE(usart_send_uint16(control.mppt_vi));
+        VERBOSE_MSG_MACHINE(usart_send_uint16(control.mpp_vi));
         VERBOSE_MSG_MACHINE(usart_send_char(' '));
-        VERBOSE_MSG_MACHINE(usart_send_uint16(control.mppt_ii));
+        VERBOSE_MSG_MACHINE(usart_send_uint16(control.mpp_ii));
         VERBOSE_MSG_MACHINE(usart_send_char(' '));
-        VERBOSE_MSG_MACHINE(usart_send_uint8(control.mppt_D)); 
+        VERBOSE_MSG_MACHINE(usart_send_uint8(control.mpp_D)); 
         VERBOSE_MSG_MACHINE(usart_send_char('\n'));
 
     }
@@ -116,8 +112,13 @@ inline void pwm_compute(void)
 {	
 #ifdef MACHINE_ON
 
+    // Compute derivates
+    control.pi[0] = (uint32_t)control.vi[0] * (uint32_t)control.ii[0];
+    control.dpi = ((int32_t)control.pi[0]) -((int32_t)control.pi[1]);
+    control.dvi = ((int32_t)control.vi[0]) -((int32_t)control.vi[1]);
+
     if(sweep_completed){
-        pertub_and_observe();
+        perturb_and_observe();
     }else{
         sweep();
     }
@@ -133,8 +134,8 @@ inline void pwm_compute(void)
     }*/
 
     // apply some threshhold saturation limits
-    if(control.D > PWM_D_MAX_THRESHHOLD)        control.D = PWM_D_MAX;
-    else if(control.D < PWM_D_MIN_THRESHHOLD)   control.D = PWM_D_MIN;
+    if(control.D > PWM_D_MAX)        control.D = PWM_D_MAX;
+    else if(control.D < PWM_D_MIN)   control.D = PWM_D_MIN;
 
     // apply dutycycle
     VERBOSE_MSG_PWM(usart_send_string("c.D. "));
@@ -143,8 +144,16 @@ inline void pwm_compute(void)
     VERBOSE_MSG_PWM(usart_send_string("PWM computed as: "));
     VERBOSE_MSG_PWM(usart_send_uint16(OCR1A));
     VERBOSE_MSG_PWM(usart_send_char('\n'));
+
+
+    // recycles
+    control.pi[1] = control.pi[0];
+    control.vi[1] = control.vi[0];
+    control.ii[1] = control.ii[0];
+    control.vo[1] = control.vo[0];
+
+
 #endif
-	
 }
 
 /**

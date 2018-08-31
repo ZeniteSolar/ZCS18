@@ -125,7 +125,7 @@ inline void can_app_extractor_mic17_mppt(can_t *msg)
         system_flags.enable = system_flags.mppt_on = 1;
 #endif
 
-        control.mppt_pot_limit      = msg->data[
+        control.pi_limit      = msg->data[
             CAN_MSG_MIC17_MPPTS_POT_BYTE];
 
     }

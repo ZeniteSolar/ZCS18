@@ -1,13 +1,13 @@
 /*
- * PeO.h
+ * mppt.h
  *
  * Created: 15/12/2017 19:20:56
  *  Author: jack
  */ 
 
 
-#ifndef PEO_H_
-#define PEO_H_
+#ifndef MPPT_H_
+#define MPPT_H_
 
 #include "../lib/cbuf.h"
 #include "conf.h"
@@ -17,8 +17,8 @@
 #ifdef ADC_ON
 #include "adc.h"
 #endif
-#define D_STEP 1
 
-void pertub_and_observe(void);
+void perturb_and_observe(void);
+void sweep(void);
 
-#endif /* PEO_H_ */
+#endif /* MPPT_H_ */

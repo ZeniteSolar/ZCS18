@@ -1,9 +1,6 @@
 #include "machine.h"
 
 /*
- * to-do:
- *      - modularize state sinalization
- *      - 
  *
  */
 
@@ -45,22 +42,38 @@ void machine_init(void)
 
     TIMSK2 |=   (1 << OCIE2A);                      // Activates interruption
 
+    set_machine_initial_state();
+    set_state_initializing();
 } 
 
 /**
- * @brief checks the quantity of the faults.
+ * @brief set machine initial state
  */
-inline void check_pwm_fault(void)
+inline void set_machine_initial_state(void)
 {
-	#ifdef PWM_ON
-    if(pwm_fault_count >= FAULT_COUNT_LIMIT){
-        error_flags.fault = 1;
-        check_pwm_fault_times = 0;
-        set_state_error();
-    }else if(check_pwm_fault_times++ > CHECKS_BEFORE_RESET_FAULT_COUNTER){
-        pwm_fault_count = 0;    
-    }
-	#endif
+#ifdef CAN_ON
+    system_flags.mppt_on = 1;
+#else
+    system_flags.mppt_on = 0;
+#endif // CAN_ON
+    system_flags.enable = 0;
+
+    error_flags.all = 0;
+
+    control.D = 0;
+    control.pi_limit = 0;
+    control.updown = 0;
+    control.vi[0] = control.vi[1] = 0;
+    control.ii[0] = control.ii[1] = 0;
+    control.pi[0] = control.pi[1] = 0;
+    control.vo[0] = control.vo[1] = 0;
+    control.io[0] = control.io[1] = 0;
+    control.po[0] = control.po[1] = 0;
+    control.dvi = control.dvo = control.dii = control.dio = control.dpi = 0;
+    control.mpp_vi = control.mpp_ii = control.mpp_pi = control.mpp_D = 0;
+
+    machine_clk = machine_clk_divider = led_clk_div = 0;
+    something_changed = 0;
 }
 
 /**
@@ -68,14 +81,15 @@ inline void check_pwm_fault(void)
  */
 inline void check_buffers(void)
 {
-    //VERBOSE_MSG_MACHINE(usart_send_string("Checking buffers..."));
+    VERBOSE_MSG_MACHINE(usart_send_string("Checking buffers..."));
 #ifdef ADC_ON
     while(!CBUF_IsFull(cbuf_adc0));
     while(!CBUF_IsFull(cbuf_adc1));
     while(!CBUF_IsFull(cbuf_adc2));
+    VERBOSE_MSG_MACHINE(usart_send_string(" \t\tdone.\n")); 
+#else
+    VERBOSE_MSG_ERROR(usart_send_string("<No buffers to check>"));
 #endif
-    //VERBOSE_MSG_ERROR(usart_send_string("<No buffers to check>"));
-    //VERBOSE_MSG_MACHINE(usart_send_string(" \t\tdone.\n")); 
 }
 
 
@@ -86,11 +100,19 @@ inline void read_and_check_adcs(void)
 { 
 #ifdef ADC_ON
     calc_avg();
-    control.vi[0] = AVG_PANEL_VOLTAGE * CONVERSION_PANEL_VOLTAGE_VALUE;
-    control.ii[0] = AVG_PANEL_CURRENT * CONVERSION_PANEL_CURRENT_VALUE;
-    control.vo[0] = AVG_BATTERY_VOLTAGE * CONVERSION_BATTERY_VOLTAGE_VALUE;
+    uint32_t tmp;
+    tmp = AVG_PANEL_VOLTAGE * ADC_PANEL_VOLTAGE_ANGULAR_COEF ;
+    control.vi[0] = tmp >> 10;
+//        +ADC_PANEL_VOLTAGE_LINEAR_COEF;
+    tmp = AVG_PANEL_CURRENT * ADC_PANEL_CURRENT_ANGULAR_COEF ; 
+    control.ii[0] = tmp >> 10;
+//        +ADC_PANEL_CURRENT_LINEAR_COEF;
+    tmp = AVG_BATTERY_VOLTAGE * ADC_BATTERY_VOLTAGE_ANGULAR_COEF ; 
+    control.vo[0] = tmp >> 10;
+//        +ADC_BATTERY_VOLTAGE_LINEAR_COEF;
 
     switch(state_machine){
+        default:
         case STATE_INITIALIZING:
             check_initializing_panel_voltage();
             check_initializing_panel_current();
@@ -109,8 +131,6 @@ inline void read_and_check_adcs(void)
             check_running_battery_voltage();
 
             break;
-        default:
-            break;
     } 
 #endif
  
@@ -121,7 +141,19 @@ inline void read_and_check_adcs(void)
 */
 inline void check_initializing_panel_current(void)
 { 
-    //
+    if(control.ii[0]> NOT_RUNNING_PANEL_CURRENT_MAX){
+        // PANEL SHORTED 
+        // or current sensor problem
+        // there is no way to diagnose
+        // -> error
+        error_flags.panel_overcurrent = 1;
+        VERBOSE_MSG_ERROR(usart_send_string("panel.overcurrent = 1\n"));
+    }else if(control.ii[0]< NOT_RUNNING_PANEL_CURRENT_MIN){
+        // PANEL OPEN 
+        // -> ok
+        error_flags.panel_overcurrent = 0;
+        VERBOSE_MSG_ERROR(usart_send_string("panel.overcurrent = 0\n"));
+    }
 }
 
 /**
@@ -129,7 +161,29 @@ inline void check_initializing_panel_current(void)
  */
 inline void check_initializing_panel_voltage(void)
 {
-    //
+    if(control.vi[0]> NOT_RUNNING_PANEL_VOLTAGE_MAX){
+        // PANEL OVERVOLTAGE 
+        // or panel voltage sensor damaged 
+        // -> error
+        error_flags.panel_overvoltage = 1;
+        VERBOSE_MSG_ERROR(usart_send_string("panel.overvoltage = 1\n"));
+    }else{
+        error_flags.panel_overvoltage = 0;
+        VERBOSE_MSG_ERROR(usart_send_string("panel.overvoltage = 0\n"));
+    }
+
+    if(control.vi[0]< NOT_RUNNING_PANEL_VOLTAGE_MIN){
+        // PANEL DISCONNECTED 
+        // or shorted: should check current
+        // if panel current isn't above limits, 
+        // the panel voltage sensor is damaged
+        // -> error
+        error_flags.panel_undervoltage = 1;
+        VERBOSE_MSG_ERROR(usart_send_string("panel.undervoltage = 1\n"));
+    }else{
+        error_flags.panel_undervoltage = 0;
+        VERBOSE_MSG_ERROR(usart_send_string("panel.undervoltage = 0\n"));
+    }
 }
 
 /**
@@ -137,7 +191,30 @@ inline void check_initializing_panel_voltage(void)
 */
 inline void check_initializing_battery_voltage(void)
 {
-    //
+    if(control.vo[0]> NOT_RUNNING_BATTERY_VOLTAGE_MAX){
+        // BATTERY OVERVOLTAGE -> overcharged
+        // or battery voltage sensor damaged
+        // if it is thee case, it will not protect against overcharge.
+        // -> error
+        error_flags.battery_overvoltage = 1;
+        VERBOSE_MSG_ERROR(usart_send_string("battery.overvoltage = 1\n"));
+    }else{
+        error_flags.battery_overvoltage = 0;
+        VERBOSE_MSG_ERROR(usart_send_string("battery.overvoltage = 0\n"));
+    }
+        
+    if(control.vo[0]< NOT_RUNNING_BATTERY_VOLTAGE_MIN ){
+        // BATTERY UNDERVOLTAGE -> discharged
+        // or battery voltage sensor damaged
+        // if it is thee case, it will not protect against overcharge.
+        // -> error
+        error_flags.battery_undervoltage = 1;
+        VERBOSE_MSG_ERROR(usart_send_string("battery.undervoltage = 1\n"));
+    }else{
+        error_flags.battery_undervoltage = 0;
+        VERBOSE_MSG_ERROR(usart_send_string("battery.undervoltage = 0\n"));
+    }
+
 }
 
 
@@ -146,13 +223,7 @@ inline void check_initializing_battery_voltage(void)
  */
 inline void check_idle_panel_current(void)
 { 
-
-	/*dif(control.ii[0] >= MAXIMUM_IDLE_PANEL_CURRENT ){		// MAXIMUM_RUNNING_PANEL_VOLTAGE sem valor em #define 
-	   d error_flags.overcurrent = 1;
-	}else if(control.ii[0] <= MINIMUM_IDLE_PANEL_CURRENT){
-		error_flags.undercurrent = 1;
-	}else error_flags.overcurrent = 0;*/
- 
+   check_initializing_panel_current();
 }
 
 /**
@@ -160,12 +231,7 @@ inline void check_idle_panel_current(void)
  */
 inline void check_idle_panel_voltage(void)
 {
-   	/*if(control.vi[0] >= MAXIMUM_IDLE_PANEL_VOLTAGE){
-	   	error_flags.overvolt_panel = 1;
-   	}else if(control.vi[0] <= MINIMUM_IDLE_PANEL_VOLTAGE){
-		error_flags.undervol_panel = 1;	
-	}else error_flags.overvolt_panel = 0; 
-    */
+    check_initializing_panel_voltage();
 }
 
 /**
@@ -173,7 +239,7 @@ inline void check_idle_panel_voltage(void)
 */
 inline void check_idle_battery_voltage(void)
 {
-    check_running_battery_voltage();
+    check_initializing_battery_voltage();
 }
  
 /**
@@ -181,11 +247,34 @@ inline void check_idle_battery_voltage(void)
  */
 inline void check_running_panel_current(void)
 {
-    if(control.ii[0] >= MAXIMUM_RUNNING_PANEL_CURRENT ){		// MAXIMUM_RUNNING_PANEL_VOLTAGE sem valor em #define 
-		error_flags.overcurrent = 1;
-	/*}else if(control.ii[0] <= MINIMUM_RUNNING_PANEL_CURRENT){
-		error_flags.undercurrent = 1;*/
-	}else error_flags.overcurrent = 0;
+    if(control.ii[0]>= RUNNING_PANEL_CURRENT_MAX){
+        // PANEL SHORTED
+        // or current sensor problem
+        // there is no way to diagnose
+        // ...or OUTPUT SHORTED
+        // than the battery voltage sensor should indicate an undervoltage
+        // in any case it should stop running.
+        // -> error
+        error_flags.panel_overcurrent = 1;
+        VERBOSE_MSG_ERROR(usart_send_string("panel.overcurrent = 1\n"));
+    }else{
+        error_flags.panel_overcurrent = 0;
+        VERBOSE_MSG_ERROR(usart_send_string("panel.overcurrent = 0\n"));
+    }
+    if(control.ii[0]<= RUNNING_PANEL_CURRENT_MIN){
+        // PANEL DISCONNECTED
+        // or FUSE BLOWED
+        // or CONTROL LOST MPP TRACK
+        // or PWM DRIVER FAILED
+        // or MOSFET FAILED OPEN
+        // or DIODE FAILED OPEN
+        // or just NOT ENOUGH SUN
+        // TODO: diagnose each case!!!
+        
+        VERBOSE_MSG_ERROR(usart_send_string("TODO: DIAGNOSE: PANEL DISCONNECTED?\n"));
+  
+    }else{
+    }
 }
 
 /**
@@ -193,13 +282,30 @@ inline void check_running_panel_current(void)
  */
 inline void check_running_panel_voltage(void)
 {
-   	/*
-    if(control.vi[0] >= MAXIMUM_RUNNING_PANEL_VOLTAGE){		// MAXIMUM_RUNNING_PANEL_VOLTAGE sem valor em #define 
-	   	error_flags.overvolt_panel = 1;
-   	}else if(control.vi[0] <= MINIMUM_RUNNING_PANEL_VOLTAGE){
-		error_flags.undervol_panel = 1;	
-	}else error_flags.overvolt_panel = 0;
-    */
+    if(control.vi[0]> RUNNING_PANEL_VOLTAGE_MAX){
+        // PANEL OVERVOLTAGE 
+        // or panel voltage sensor damaged 
+        // -> error but not critical
+        error_flags.panel_overvoltage = 1;
+        VERBOSE_MSG_ERROR(usart_send_string("panel.overvoltage = 1\n"));
+    }else{
+        error_flags.panel_overvoltage = 0;
+        VERBOSE_MSG_ERROR(usart_send_string("panel.overvoltage = 0\n"));
+    }
+
+    if(control.vi[0]< RUNNING_PANEL_VOLTAGE_MIN){
+        // PANEL DISCONNECTED???
+        // TODO: check the sensor measurements in the prototype for this case
+        // or shorted: should check current
+        // if panel current isn't above limits, 
+        // the panel voltage sensor is damaged
+        // -> error but not critical
+        error_flags.panel_undervoltage = 1;
+        VERBOSE_MSG_ERROR(usart_send_string("panel.undervoltage = 1\n"));
+    }else{
+        error_flags.panel_undervoltage = 0;
+        VERBOSE_MSG_ERROR(usart_send_string("panel.undervoltage = 0\n"));
+    }
 }
 
 /**
@@ -207,11 +313,29 @@ inline void check_running_panel_voltage(void)
  */
 inline void check_running_battery_voltage(void) // sem panel
 {
-   	if(control.vo[0] >= MAXIMUM_BATTERY_VOLTAGE){		// MAXIMUM_RUNNING_PANEL_VOLTAGE sem valor em #define 
-	   	error_flags.overvoltage = 1;
-   	/*}else if(control.vo[0] <= MINIMUM_BATTERY_VOLTAGE){
-		error_flags.undervoltage = 1; */
-	}else error_flags.overvoltage = 0; 
+    if(control.vo[0]> RUNNING_BATTERY_VOLTAGE_MAX){
+        // BATTERY OVERVOLTAGE -> overcharged
+        // or battery voltage sensor damaged
+        // if it is thee case, it will not protect against overcharge.
+        // -> error
+        error_flags.battery_overvoltage = 1;
+        VERBOSE_MSG_ERROR(usart_send_string("battery.overvoltage = 1\n"));
+    }else{
+        error_flags.battery_overvoltage = 0;
+        VERBOSE_MSG_ERROR(usart_send_string("battery.overvoltage = 1\n"));
+    }
+        
+    if(control.vo[0]< RUNNING_BATTERY_VOLTAGE_MIN ){
+        // BATTERY UNDERVOLTAGE -> discharged
+        // or battery voltage sensor damaged
+        // if it is thee case, it will not protect against overcharge.
+        // -> error
+        error_flags.battery_undervoltage = 1;
+        VERBOSE_MSG_ERROR(usart_send_string("battery.undervoltage = 1\n"));
+    }else{
+        error_flags.battery_undervoltage = 0;
+        VERBOSE_MSG_ERROR(usart_send_string("battery.undervoltage = 0\n"));
+    }
 }
 
 /**
@@ -219,6 +343,7 @@ inline void check_running_battery_voltage(void) // sem panel
  */
 inline void set_state_error(void)
 {
+    VERBOSE_MSG_MACHINE(usart_send_string("\n>>>STATE ERROR\n"));
     state_machine = STATE_ERROR;
 }
 
@@ -227,6 +352,7 @@ inline void set_state_error(void)
 */ 
 inline void set_state_initializing(void)
 {
+    VERBOSE_MSG_MACHINE(usart_send_string("\n>>>INITIALIZING STATE\n"));
     state_machine = STATE_INITIALIZING;
 }
 
@@ -235,6 +361,7 @@ inline void set_state_initializing(void)
 */ 
 inline void set_state_idle(void)
 {
+    VERBOSE_MSG_MACHINE(usart_send_string("\n>>>IDLE STATE\n"));
     state_machine = STATE_IDLE;
 #ifdef PWM_ON
     pwm_reset();
@@ -246,7 +373,52 @@ inline void set_state_idle(void)
 */ 
 inline void set_state_running(void)
 {
+    VERBOSE_MSG_MACHINE(usart_send_string("\n>>>RUNNING STATE\n"));
     state_machine = STATE_RUNNING;
+}
+
+/**
+ * @brief set reset state
+ */
+inline void set_state_reset(void)
+{
+    VERBOSE_MSG_MACHINE(usart_send_string("\n>>>RESET STATE\n"));
+    state_machine = STATE_RESET;
+}
+
+/**
+ * @breif prints the configurations and definitions
+ */
+inline void print_configurations(void)
+{    
+
+    VERBOSE_MSG_MACHINE(usart_send_string("CONFIGURATIONS:\n"));
+    VERBOSE_MSG_MACHINE(usart_send_string("\nvi: "));
+    VERBOSE_MSG_MACHINE(usart_send_uint32( NOT_RUNNING_PANEL_VOLTAGE_MAX ));
+    VERBOSE_MSG_MACHINE(usart_send_char(','));
+    VERBOSE_MSG_MACHINE(usart_send_uint32( NOT_RUNNING_PANEL_VOLTAGE_MIN ));
+    VERBOSE_MSG_MACHINE(usart_send_string("\nii: "));
+    VERBOSE_MSG_MACHINE(usart_send_uint32( NOT_RUNNING_PANEL_CURRENT_MAX ));
+    VERBOSE_MSG_MACHINE(usart_send_char(','));
+    VERBOSE_MSG_MACHINE(usart_send_uint32( NOT_RUNNING_PANEL_CURRENT_MIN ));
+    VERBOSE_MSG_MACHINE(usart_send_string("\nvo: "));
+    VERBOSE_MSG_MACHINE(usart_send_uint32( NOT_RUNNING_BATTERY_VOLTAGE_MAX ));
+    VERBOSE_MSG_MACHINE(usart_send_char(','));
+    VERBOSE_MSG_MACHINE(usart_send_uint32( NOT_RUNNING_BATTERY_VOLTAGE_MIN )); 
+
+    VERBOSE_MSG_MACHINE(usart_send_string("\nvi: "));
+    VERBOSE_MSG_MACHINE(usart_send_uint32( RUNNING_PANEL_VOLTAGE_MAX ));
+    VERBOSE_MSG_MACHINE(usart_send_char(','));
+    VERBOSE_MSG_MACHINE(usart_send_uint32( RUNNING_PANEL_VOLTAGE_MIN ));
+    VERBOSE_MSG_MACHINE(usart_send_string("\nii: "));
+    VERBOSE_MSG_MACHINE(usart_send_uint32( RUNNING_PANEL_CURRENT_MAX ));
+    VERBOSE_MSG_MACHINE(usart_send_char(','));
+    VERBOSE_MSG_MACHINE(usart_send_uint32( RUNNING_PANEL_CURRENT_MIN ));
+    VERBOSE_MSG_MACHINE(usart_send_string("\nvo: "));
+    VERBOSE_MSG_MACHINE(usart_send_uint32( RUNNING_BATTERY_VOLTAGE_MAX ));
+    VERBOSE_MSG_MACHINE(usart_send_char(','));
+    VERBOSE_MSG_MACHINE(usart_send_uint32( RUNNING_BATTERY_VOLTAGE_MIN ));
+    VERBOSE_MSG_MACHINE(usart_send_char('\n'));
 }
 
 /**
@@ -266,36 +438,14 @@ inline void print_system_flags(void)
 */
 inline void print_error_flags(void)
 {
-    /*
-    VERBOSE_MSG_MACHINE(usart_send_string("\nOvrI: "));
-    VERBOSE_MSG_MACHINE(usart_send_char(48+error_flags.overcurrent));
-    
-    VERBOSE_MSG_MACHINE(usart_send_string(" OvrV: "));
-    VERBOSE_MSG_MACHINE(usart_send_char(48+error_flags.overvoltage));
-
-    VERBOSE_MSG_MACHINE(usart_send_string(" UndV: "));
-    VERBOSE_MSG_MACHINE(usart_send_char(48+error_flags.undervoltage));
-
-    VERBOSE_MSG_MACHINE(usart_send_string(" OvrT: "));
-    VERBOSE_MSG_MACHINE(usart_send_char(48+error_flags.overheat));
-
-    VERBOSE_MSG_MACHINE(usart_send_string(" F: "));
-    VERBOSE_MSG_MACHINE(usart_send_char(48+error_flags.fault)); 
-
-    VERBOSE_MSG_MACHINE(usart_send_string(" NOCAN: "));
-    VERBOSE_MSG_MACHINE(usart_send_char(48+error_flags.no_canbus));
-    */
     VERBOSE_MSG_MACHINE(usart_send_string("errFl: "));
-    VERBOSE_MSG_MACHINE(usart_send_char(48+error_flags.overcurrent));
-    VERBOSE_MSG_MACHINE(usart_send_char(48+error_flags.undercurrent));
-    VERBOSE_MSG_MACHINE(usart_send_char(48+error_flags.overvoltage));
-    VERBOSE_MSG_MACHINE(usart_send_char(48+error_flags.undervoltage));
-    VERBOSE_MSG_MACHINE(usart_send_char(48+error_flags.overvolt_panel));
-    VERBOSE_MSG_MACHINE(usart_send_char(48+error_flags.undervolt_panel));
-    VERBOSE_MSG_MACHINE(usart_send_char(48+error_flags.overheat));
-    VERBOSE_MSG_MACHINE(usart_send_char(48+error_flags.fault));
+    VERBOSE_MSG_MACHINE(usart_send_char(48+error_flags.panel_overvoltage));
+    VERBOSE_MSG_MACHINE(usart_send_char(48+error_flags.panel_undervoltage));
+    VERBOSE_MSG_MACHINE(usart_send_char(48+error_flags.panel_overcurrent));
+    VERBOSE_MSG_MACHINE(usart_send_char(48+error_flags.battery_overvoltage));
+    VERBOSE_MSG_MACHINE(usart_send_char(48+error_flags.battery_undervoltage));
+    VERBOSE_MSG_MACHINE(usart_send_char(48+error_flags.battery_overcurrent));
     VERBOSE_MSG_MACHINE(usart_send_char(48+error_flags.no_canbus));
-
 }
  
 /**
@@ -304,10 +454,7 @@ inline void print_error_flags(void)
 inline void print_control_others(void)
 {
     VERBOSE_MSG_MACHINE(usart_send_string(" ctrl: "));
-    VERBOSE_MSG_MACHINE(usart_send_uint8(control.mppt_pot_limit));
-    VERBOSE_MSG_MACHINE(usart_send_char(' '));
-    VERBOSE_MSG_MACHINE(usart_send_uint8(control.fault));
-
+    VERBOSE_MSG_MACHINE(usart_send_uint8(control.pi_limit));
 }
 
 /**
@@ -322,7 +469,7 @@ inline void print_control_d(void)
     VERBOSE_MSG_MACHINE(usart_send_char(' '));
 }
 /**
-* @brief prints control vi infos
+* @brief prints control.vi[0]infos
 */
 inline void print_control_vi(void)
 {
@@ -343,7 +490,7 @@ inline void print_control_dvi(void)
 }
  
 /**
-* @brief prints control ii infos
+* @brief prints control.ii[0]infos
 */
 inline void print_control_ii(void)
 {
@@ -365,7 +512,7 @@ inline void print_control_dii(void)
  
  
 /**
-* @brief prints control vo infos
+* @brief prints control.vo[0]infos
 */
 inline void print_control_vo(void)
 {
@@ -387,7 +534,7 @@ inline void print_control_dvo(void)
  
 
 /**
-* @brief prints control vo infos
+* @brief prints control.vo[0]infos
 */
 inline void print_control_pi(void)
 {
@@ -428,12 +575,15 @@ inline void task_initializing(void)
     set_led();
 #endif
 #ifdef PWM_ON
+    pwm_reset();
     set_pwm_off();
 #endif
-    pwm_fault_count = 0;
 
-    check_buffers();
+    set_machine_initial_state();
+
     
+    check_buffers();
+
     VERBOSE_MSG_INIT(usart_send_string("System initialized without errors.\n"));
     set_state_idle();
 }
@@ -459,7 +609,7 @@ inline void task_idle(void)
     if(system_flags.mppt_on && system_flags.enable){
         if(init_pwm_increment_divider++){
             init_pwm_increment_divider = 0;
-            if(control.D < PWM_INITIAL_D) control.D++;
+            if(control.D < PWM_D_INITIAL) control.D++;
             else{
                 if(!error_flags.all){
                     VERBOSE_MSG_MACHINE(usart_send_string("Enjoy, the system is at its RUNNING STATE!!\n"));
@@ -473,8 +623,12 @@ inline void task_idle(void)
         }
         pwm_compute();
     }*/
-#endif
-    set_state_running();
+
+    if(system_flags.mppt_on && system_flags.enable){
+        set_state_running();
+    }
+
+#endif // PWM_ON
 
 }
 
@@ -489,12 +643,12 @@ inline void task_running(void)
         cpl_led();
         led_clk_div = 0;
     }
-#endif
+#endif // LED_ON
 
     if(system_flags.mppt_on && system_flags.enable){
 #ifdef PWM_ON
         pwm_compute();
-#endif
+#endif //PWM_ON
     }else{
         set_state_idle();
     }
@@ -522,12 +676,10 @@ inline void task_error(void)
     VERBOSE_MSG_ERROR(usart_send_uint16(error_flags.all));
     VERBOSE_MSG_ERROR(usart_send_char('\n'));
 
-    if(error_flags.overcurrent)
+    if(error_flags.panel_overcurrent)
         VERBOSE_MSG_ERROR(usart_send_string("\t - Panel over-current!\n"));
-    if(error_flags.overvoltage)
+    if(error_flags.battery_overvoltage)
         VERBOSE_MSG_ERROR(usart_send_string("\t - Battery over-voltage!\n"));
-    if(error_flags.fault)
-        VERBOSE_MSG_ERROR(usart_send_string("\t - FAULT!\n"));
     if(error_flags.no_canbus)
         VERBOSE_MSG_ERROR(usart_send_string("\t - No canbus communication with MIC17!\n"));
     if(!error_flags.all)
@@ -542,13 +694,33 @@ inline void task_error(void)
     }
     if(total_errors >= 20){
         VERBOSE_MSG_ERROR(usart_send_string("The watchdog will reset the whole system.\n"));
-        for(;;);    // waits the watchdog to reset.
+        set_state_reset();
     }
     
 #ifdef LED_ON
     cpl_led();
 #endif
     set_state_initializing();
+}
+
+/**
+ * @brief reset error task just freezes the processor and waits for watchdog
+ */
+inline void task_reset(void)
+{   
+#ifdef PWM_ON
+    pwm_reset();
+    set_pwm_off();
+#endif
+
+#ifndef WATCHDOG_ON
+    wdt_init();
+#endif
+
+    cli();  // disable interrupts
+
+    VERBOSE_MSG_ERROR(usart_send_string("WAITING FOR A RESET!\n"));
+    for(;;);
 }
 
 void print_infos(void)
@@ -558,10 +730,10 @@ void print_infos(void)
     if(something_changed){
         switch(i++){
             case 0:
-                //print_system_flags();
+                print_system_flags();
                 break;
             case 1:
-                //print_error_flags();
+                print_error_flags();
                 break;
             case 2:
                 print_control_d();
@@ -570,7 +742,7 @@ void print_infos(void)
                 print_control_vi();
                 break;
             case 4:
-                print_control_dvi();
+                //print_control_dvi();
                 break;
             case 5:
                 print_control_ii();
@@ -588,7 +760,7 @@ void print_infos(void)
                 print_control_pi();
                 break;
             case 10:
-                print_control_dpi();
+                //print_control_dpi();
                 break;
             case 11:
                 //print_control_others(); 
@@ -615,20 +787,32 @@ inline void machine_run(void)
     system_flags.enable = system_flags.mppt_on = 1;
 	#endif
 
-#define MACHINE_CLK_DIVIDER_VALUE           20
-    static uint8_t machine_clk_divider = 0;
-
     print_infos();
 
     if(machine_clk){
         machine_clk = 0;
-        if(machine_clk_divider++ == MACHINE_CLK_DIVIDER_VALUE){
-            machine_clk_divider = 0;
 
-            if(adc_data_ready){
-                adc_data_ready = 0;
-                read_and_check_adcs();
-            } 
+        if(adc_data_ready){
+            adc_data_ready = 0;
+
+            read_and_check_adcs();
+
+            if(error_flags.all){
+                print_system_flags();
+                print_error_flags();
+                print_infos();
+                print_control_others();
+                print_control_d();
+                print_control_vi();
+                print_control_dvi();
+                print_control_ii();
+                print_control_dii();
+                print_control_vo();
+                print_control_dvo();
+                print_control_pi();
+                print_control_dpi();
+                set_state_error();
+            }
 
             something_changed = 1;
 
@@ -648,33 +832,37 @@ inline void machine_run(void)
                 case STATE_ERROR:
                     task_error();
 
+                case STATE_RESET:
                 default:
+                    task_reset();
                     break;
             }
-        }
+        } 
     }
 }
 
 /**
- * @brief Interrupcao das chaves: se alguma chave desligar, o motor desliga.
+ * @brief Interrupcao do pino de sobretensão via hardware
  */
-
-ISR(INT0_vect) //overvoltage
+ISR(INT0_vect)
 {
-	control.fault = 1;
-}
-ISR(INT1_vect) //enable
-{    
-    /*if(bit_is_clear(FAULT_PIN, FAULT)){
-        pwm_treat_fault();
-#ifdef LED_ON
-        cpl_led();
+#ifdef ENABLE_HARDWARE_OVERVOLTAGE_INTERRUPT
+    error_flags.battery_overvoltage = 1;
+    set_state_error();
+    VERBOSE_MSG_ERROR(usart_send_string("OVERVOLTAGE INTERRUPT\n"));
 #endif
-        pwm_fault_count++;
-    }
-    */
+}
+
+/**
+* @brief Interrupcao do pino da chave enable via hardware
+*/ 
+ISR(INT1_vect)
+{    
+#ifdef ENABLE_HARDWARE_ENABLE_SWITCH_INTERRUPT
     system_flags.enable = 0;
-    DEBUG1;
+    set_state_idle();
+    VERBOSE_MSG_ERROR(usart_send_string("ENABLE SWITCH INTERRUPT\n"));
+#endif
 }
 
 /**
@@ -682,7 +870,15 @@ ISR(INT1_vect) //enable
 */
 ISR(TIMER2_COMPA_vect)
 {
-    VERBOSE_MSG_ERROR(if(machine_clk) usart_send_string("\nERROR: CLOCK CONFLICT!!!\n"));
-	machine_clk = 1;
+    if(machine_clk_divider++ == MACHINE_CLK_DIVIDER_VALUE){
+        /*if(machine_clk){
+            for(;;){
+                pwm_reset();
+                VERBOSE_MSG_ERROR(if(machine_clk) usart_send_string("\nERROR: CLOCK CONFLICT!!!\n"));
+            }
+        }*/
+        machine_clk = 1;
+        machine_clk_divider = 0;
+    }
 }
 

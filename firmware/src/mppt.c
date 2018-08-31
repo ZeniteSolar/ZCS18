@@ -1,11 +1,25 @@
 /*
- * PeO.c
+ * mppt.c
  */ 
-#include "PeO.h"
+#include "mppt.h"
+
+
+// ref: J. Ahmed, Z. Salam / Applied Energy 150 (2015) 97–108
+// doi:10.1016/j.apenergy.2015.04.006
+inline void perturb_and_observe(void)
+{   
+    static int8_t d_step = PWM_D_STEP;
+    
+    if(control.dpi <= 0)    d_step = -d_step;
+    control.D += d_step;
+
+}
+
+
 /**
  * @brief P&O modified algorithm 
- */
-inline void pertub_and_observe(void)
+ 
+inline void perturb_and_observe___old___(void)
 {	
 #ifdef MACHINE_ON
 
@@ -72,3 +86,4 @@ inline void pertub_and_observe(void)
     control.vo[1] = control.vo[0];
 #endif //MACHINE_ON
 }
+*/

@@ -23,7 +23,7 @@
 //#define VERBOSE_ON_ADC
 //#define VERBOSE_ON_PWM
 #define VERBOSE_ON_INIT
-#define VERBOSE_ON_ERROR
+//#define VERBOSE_ON_ERROR
 
 
 // MODULES ACTIVATION
@@ -34,7 +34,7 @@
 #define MACHINE_ON
 #define PWM_ON
 #define LED_ON
-//#define WATCHDOG_ON
+#define WATCHDOG_ON
 //#define SLEEP_ON
 
 
@@ -45,55 +45,112 @@
 //#define CONVERTER_TEST_WITH_FIXED_DUTYCYCLE_DT_VALUE 0.30*(PWM_TOP)
 //#define PWM_TEST 
 //#define PEO_TEST
- 
-#define INITIAL_D                   0.8f            //!< float value from 0 to 1
-#define PWM_FREQUENCY               100000          //<! pwm frequency in Hz
-#define PWM_D_DELTA                 1               //!< amount to increase (may interfer on threshholds)
-#define PWM_D_MAX_DELTA             1               //!< clock divisor
-#define PWM_D_MIN                   0.35*(PWM_TOP)  //!< minimum D
-#define PWM_D_MAX                   0.9*(PWM_TOP)   //!< maximum D
-#define PWM_D_MIN_THRESHHOLD        PWM_D_MIN       //!< minimum D threshhold
-#define PWM_D_MAX_THRESHHOLD        PWM_D_MAX       //!< maximum D threshhold
-#define PWM_D_LIN_MULT              1               //!< this is A for D = (D*A) >> B
-#define PWM_D_LIN_DIV               1               //!< this is B for D = (D*A) >> B
-#ifdef CONVERTER_TEST_WITH_FIXED_DUTYCYCLE
-#define PWM_INITIAL_D               CONVERTER_TEST_WITH_FIXED_DUTYCYCLE_DT_VALUE
-#else
-#define PWM_INITIAL_D               (INITIAL_D)*(PWM_TOP)
-#endif
-#define FORCE_VARIATION_OF_D_WHEN_ZERO_POWER_DETECTED
-#ifdef FORCE_VARIATION_OF_D_WHEN_ZERO_POWER_DETECTED
-#define MAX_ZERO_POWER_TIMES        10             //!< 
-#endif
-#define DYNAMIC_D_STEP_SIZE
-#ifdef DYNAMIC_D_STEP_SIZE
-#define PWM_D_MAX_STEP              (PWM_D_MAX/2)
-#endif
-#define PWM_D_MIN_STEP              1
 
-// number of checks before reset the pwm fault counter.
-#define CHECKS_BEFORE_RESET_FAULT_COUNTER 100
-// maximum of consecutive faults before state an error
-#define FAULT_COUNT_LIMIT           50
-#endif
+#define PWM_FREQUENCY                       100000          //<! pwm frequency in Hz
+#define PWM_D_NOMINAL                       0.6*(PWM_TOP)   //!< float value from 0 to 1
+#define PWM_D_MIN                           0.2*(PWM_TOP)  //!< minimum D
+#define PWM_D_MAX                           0.96*(PWM_TOP)   //!< maximum D
+#define PWM_D_STEP 					        1
+#define PWM_D_MIN_STEP				        1*PWM_D_STEP
+#define PWM_D_MAX_STEP				        4*PWM_D_STEP
+
+#endif // PWM_ON
+
+#ifdef ADC_ON
+// ADC CONFIGURATION
+#define ADC_PANEL_VOLTAGE                   adc0
+#define ADC_PANEL_CURRENT                   adc1
+#define ADC_BATTERY_VOLTAGE                 adc2
+#define AVG_PANEL_VOLTAGE                   avg_adc0
+#define AVG_PANEL_CURRENT                   avg_adc1
+#define AVG_BATTERY_VOLTAGE                 avg_adc2
+#define ADC_NOISE_VALUE                     10
+#define ADC_PANEL_VOLTAGE_ANGULAR_COEF      46157 //(40000/((4/5)*1024))
+//#define ADC_PANEL_VOLTAGE_LINEAR_COEF       0
+#define ADC_PANEL_CURRENT_ANGULAR_COEF      22461 //(16000/(((16*200*1500e-6)/5)*1024))
+//#define ADC_PANEL_CURRENT_LINEAR_COEF       0
+#define ADC_BATTERY_VOLTAGE_ANGULAR_COEF    66071 //~(60000/1024)
+//#define ADC_BATTERY_VOLTAGE_LINEAR_COEF     0
+#endif //ADC_ON
 
 #ifdef MACHINE_ON
-#define MACHINE_TIMER_FREQUENCY     100         //<! machine timer frequency in Hz
-#define MACHINE_TIMER_PRESCALER     1024        //<! machine timer prescaler
-#endif
+#define MACHINE_TIMER_FREQUENCY             120     //<! machine timer frequency in Hz
+#define MACHINE_TIMER_PRESCALER             1024    //<! machine timer prescaler
+#define MACHINE_CLK_DIVIDER_VALUE           4       //<! machine_run clock divider
+#define MACHINE_FREQUENCY                   (MACHINE_TIMER_FREQUENCY)/(MACHINE_CLK_DIVIDER_VALUE)
 
+#define VSCALE                              (uint16_t)1000
+#define ISCALE                              (uint16_t)1000
+#define PSCALE                              (uint32_t)(VSCALE)*(ISCALE)
+
+// BATTERY DEFINITIONS
+#define BATTERY_CELL_NOMINAL_VOLTAGE        12.0    *(VSCALE)
+#define BATTERY_CELL_FAST_CHARGE_VOLTAGE    15.6    *(VSCALE)
+#define BATTERY_CELL_NORMAL_CHARGE_VOLTAGE  13.8    *(VSCALE)
+#define BATTERY_CELL_DISCHARGED_VOLTAGE     7.00    *(VSCALE)
+#define BATTERY_BANK_SERIES_CELL            3
+#define BATTERY_BANK_NOMINAL_VOLTAGE        (BATTERY_BANK_SERIES_CELL)*(BATTERY_CELL_NOMINAL_VOLTAGE)
+#define BATTERY_BANK_FAST_CHARGE_VOLTAGE    (BATTERY_BANK_SERIES_CELL)*(BATTERY_CELL_FAST_CHARGE_VOLTAGE)
+#define BATTERY_BANK_NORMAL_CHARGE_VOLTAGE  (BATTERY_BANK_SERIES_CELL)*(BATTERY_CELL_NORMAL_CHARGE_VOLTAGE)
+#define BATTERY_BANK_DISCHARGED_VOLTAGE     (BATTERY_BANK_SERIES_CELL)*(BATTERY_CELL_DISCHARGED_VOLTAGE)
+
+// PANEL DEFINITIONS
+#define PANEL_MODEL_NAME                    JKM260P
+#define PANEL_STC_OPEN_VOLTAGE              38.1    *(VSCALE)
+#define PANEL_STC_SHORT_CURRENT             8.98    *(ISCALE)
+#define PANEL_STC_MPP_VOLTAGE               31.1    *(VSCALE)
+#define PANEL_STC_MPP_CURRENT               8.37    *(ISCALE)
+#define PANEL_STC_MPP_POWER                 260.    *(PSCALE)
+#define PANEL_NOTC_OPEN_VOLTAGE             35.2    *(VSCALE)
+#define PANEL_NOTC_SHORT_CURRENT            7.31    *(ISCALE)
+#define PANEL_NOTC_MPP_VOLTAGE              28.7    *(VSCALE)
+#define PANEL_NOTC_MPP_CURRENT              7.31    *(ISCALE)
+#define PANEL_NOTC_MPP_POWER                193.    *(PSCALE)
+
+// MPPT DEFINITIONS
+#define NOT_RUNNING_PANEL_VOLTAGE_MAX       1.25*(PANEL_STC_OPEN_VOLTAGE)    
+#define NOT_RUNNING_PANEL_VOLTAGE_MIN       (ADC_NOISE_VALUE)*(ADC_PANEL_VOLTAGE_ANGULAR_COEF >> 10)
+#define NOT_RUNNING_PANEL_CURRENT_MAX       (ADC_NOISE_VALUE)*(ADC_PANEL_CURRENT_ANGULAR_COEF >> 10)
+#define NOT_RUNNING_PANEL_CURRENT_MIN       (ADC_NOISE_VALUE)*(ADC_PANEL_CURRENT_ANGULAR_COEF >> 10)
+#define NOT_RUNNING_BATTERY_VOLTAGE_MAX     (BATTERY_BANK_FAST_CHARGE_VOLTAGE)
+#define NOT_RUNNING_BATTERY_VOLTAGE_MIN     0.75*(BATTERY_BANK_DISCHARGED_VOLTAGE)
+#define NOT_RUNNING_BATTERY_CURRENT_MAX     (ADC_NOISE_VALUE)*(ADC_NOISE_VALUE)
+#define NOT_RUNNING_BATTERY_CURRENT_MIN     (ADC_NOISE_VALUE)*(ADC_NOISE_VALUE)
+#define NOT_RUNNING_PANEL_POWER_MAX         (ADC_NOISE_VALUE)*(ADC_NOISE_VALUE)*(ADC_PANEL_VOLTAGE_ANGULAR_COEF >> 10)*(ADC_PANEL_CURRENT_ANGULAR_COEF >> 10)
+#define NOT_RUNNING_PANEL_POWER_MIN         (ADC_NOISE_VALUE)*(ADC_NOISE_VALUE)*(ADC_PANEL_VOLTAGE_ANGULAR_COEF >> 10)*(ADC_PANEL_CURRENT_ANGULAR_COEF >> 10)
+#define NOT_RUNNING_BATTERY_POWER_MAX       (ADC_NOISE_VALUE)*(ADC_NOISE_VALUE)
+#define NOT_RUNNING_BATTERY_POWER_MIN       (ADC_NOISE_VALUE)*(ADC_NOISE_VALUE)
+
+#define RUNNING_PANEL_VOLTAGE_MAX    		1.25*(PANEL_STC_OPEN_VOLTAGE)    
+#define RUNNING_PANEL_VOLTAGE_MIN    		(ADC_NOISE_VALUE)*(ADC_PANEL_VOLTAGE_ANGULAR_COEF >> 10)
+#define RUNNING_PANEL_CURRENT_MAX    		1.25*(PANEL_STC_SHORT_CURRENT)
+#define RUNNING_PANEL_CURRENT_MIN    		(ADC_NOISE_VALUE)*(ADC_PANEL_CURRENT_ANGULAR_COEF >> 10) 
+#define RUNNING_BATTERY_VOLTAGE_MAX  		(BATTERY_BANK_FAST_CHARGE_VOLTAGE)
+#define RUNNING_BATTERY_VOLTAGE_MIN  		(BATTERY_BANK_DISCHARGED_VOLTAGE)
+#define RUNNING_BATTERY_CURRENT_MAX  		1.25*(((PWM_TOP-control.D)/control.D)*control.ii)
+#define RUNNING_BATTERY_CURRENT_MIN  	    0.75*(((PWM_TOP-control.D)/control.D)*control.ii)
+#define RUNNING_PANEL_POWER_MAX      		1.15*(PANEL_STC_MPP_POWER)
+#define RUNNING_PANEL_POWER_MIN      		(ADC_NOISE_VALUE)*(ADC_NOISE_VALUE)*(ADC_PANEL_VOLTAGE_ANGULAR_COEF >> 10)*(ADC_PANEL_CURRENT_ANGULAR_COEF >> 10) 
+#define RUNNING_BATTERY_POWER_MAX    		1.15*(PANEL_STC_MPP_POWER)
+#define RUNNING_BATTERY_POWER_MIN    		(ADC_NOISE_VALUE)*(ADC_NOISE_VALUE)*(ADC_PANEL_VOLTAGE_ANGULAR_COEF >> 10)*(ADC_PANEL_CURRENT_ANGULAR_COEF >> 10) 
+
+//#define ENABLE_HARDWARE_OVERVOLTAGE_INTERRUPT
+#define ENABLE_HARDWARE_ENABLE_SWITCH_INTERRUPT
 
 // INPUT PINS DEFINITIONS
-/*#define     BatOverVoltageInterrupt_PORT PORTD	// <--------- ADICIONADO
+#ifdef ENABLE_HARDWARE_OVERVOLTAGE_INTERRUPT  
+#define     BatOverVoltageInterrupt_PORT PORTD
 #define     BatOverVoltageInterrupt_PIN  PIND
 #define     BatOverVoltageInterrupt_DDR  DDRD
 #define     BatOverVoltageInterrupt      PD2
+#endif // ENABLE_HARDWARE_OVERVOLTAGE_INTERRUPT
 
-#define     Enable_PORT             PORTD	// <------------- ADICIONADO
+#ifdef ENABLE_HARDWARE_ENABLE_SWITCH_INTERRUPT
+#define     Enable_PORT             PORTD
 #define     Enable_PIN              PIND
 #define     Enable_DDR              DDRD
 #define     Enable                  PD3
-*/
+#endif // ENABLE_HARDWARE_ENABLE_SWITCH_INTERRUPT
 
 
 // OUTPUT PINS DEFINITIONS
@@ -102,7 +159,7 @@
 #define     PWM_PIN                 PINB
 #define     PWM_DDR                 DDRB
 #define     PWM                     PB1
-#endif 
+#endif // PWM_ON
 
 #ifdef LED_ON
 #define     LED_PORT                PORTD
@@ -116,9 +173,11 @@
 #define     cpl_led()               
 #define     set_led()               
 #define     clr_led()               
-#endif
+#endif // LED_ON
 
+#endif // MACHINE_ON
 
+#ifdef CAN_ON
 // CANBUS DEFINITONS
 // ----------------------------------------------------------------------------
 /* Global settings for building the can-lib and application program.
@@ -142,6 +201,6 @@
  * be 0 all the time.
  */
 #define	SUPPORT_TIMESTAMPS		0
-
+#endif // CAN_ON
 
 #endif /* ifndef CONF_H */

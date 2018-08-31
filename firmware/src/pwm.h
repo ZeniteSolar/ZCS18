@@ -16,7 +16,7 @@
 
 #include "conf.h"
 #include "dbg_vrb.h"
-#include "PeO.h"
+#include "mppt.h"
 #include "../lib/cbuf.h"
 #ifdef USART_ON
 #include "usart.h"
@@ -26,8 +26,8 @@
 #endif
 
 // DEFAULT CONFIGURATION. conf.h should overwrite it
-#ifndef INITIAL_D
-#define INITIAL_D       0
+#ifndef PWM_D_INITIAL
+#define PWM_D_INITIAL       0
 #endif
 #ifndef PWM_FREQUENCY
 #define PWM_FREQUENCY   1000

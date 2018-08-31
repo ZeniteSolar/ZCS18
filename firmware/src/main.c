@@ -2,14 +2,24 @@
 
 #include "main.h"
 
-int main(void)
+void init(void)
 {
+    #ifdef WATCHDOG_ON
+        wdt_init();
+    #endif 
+ 
     #ifdef USART_ON
         usart_init(MYUBRR,1,1);                         // inicializa a usart
         VERBOSE_MSG_INIT(usart_send_string("\n\n\nUSART... OK!\n"));
     #endif
 
-    _delay_ms(1000);
+    #ifdef WATCHDOG_ON
+        VERBOSE_MSG_INIT(usart_send_string("WATCHDOG..."));
+        wdt_reset();
+        VERBOSE_MSG_INIT(usart_send_string(" OK!\n"));
+    #else
+        VERBOSE_MSG_INIT(usart_send_string("WATCHDOG... OFF!\n"));
+    #endif
 
     #ifdef PWM_ON
         VERBOSE_MSG_INIT(usart_send_string("PWM..."));
@@ -17,6 +27,10 @@ int main(void)
         VERBOSE_MSG_INIT(usart_send_string(" OK!\n"));
     #else
         VERBOSE_MSG_INIT(usart_send_string("PWM... OFF!\n"));
+    #endif
+
+    #ifdef WATCHDOG_ON
+        wdt_reset();
     #endif
 
     #ifdef CAN_ON
@@ -30,12 +44,20 @@ int main(void)
         VERBOSE_MSG_INIT(usart_send_string("CAN... OFF!\n"));
     #endif
 
+    #ifdef WATCHDOG_ON
+        wdt_reset();
+    #endif
+
     #ifdef ADC_ON
         VERBOSE_MSG_INIT(usart_send_string("ADC..."));
         adc_init();
         VERBOSE_MSG_INIT(usart_send_string(" OK!\n"));
     #else
         VERBOSE_MSG_INIT(usart_send_string("ADC... OFF!\n"));
+    #endif
+
+    #ifdef WATCHDOG_ON
+        wdt_reset();
     #endif
 
     #ifdef SLEEP_ON 
@@ -47,11 +69,7 @@ int main(void)
     #endif
 
     #ifdef WATCHDOG_ON
-        VERBOSE_MSG_INIT(usart_send_string("WATCHDOG..."));
-        wdt_init();
-        VERBOSE_MSG_INIT(usart_send_string(" OK!\n"));
-    #else
-        VERBOSE_MSG_INIT(usart_send_string("WATCHDOG... OFF!\n"));
+        wdt_reset();
     #endif
 
  	#ifdef MACHINE_ON
@@ -61,6 +79,10 @@ int main(void)
     #else
         VERBOSE_MSG_INIT(usart_send_string("MACHINE... OFF!\n"));
 	#endif
+
+    #ifdef WATCHDOG_ON
+        wdt_reset();
+    #endif
 	
     #ifdef LED_ON
         set_bit(LED_DDR, LED);                      // LED como saída
@@ -69,10 +91,21 @@ int main(void)
         VERBOSE_MSG_INIT(usart_send_string("LED... OFF!\n"));
     #endif
 
-	/*
-    // ------------------------------------------------------------------------
-	clr_bit(BatOverVoltageInterrupt_DDR,BatOverVoltageInterrupt);	// BatOverVoltageInterrupt como entrada
+    #ifdef WATCHDOG_ON
+        wdt_reset();
+    #endif
+
 	
+    // ------------------------------------------------------------------------
+#ifdef ENABLE_HARDWARE_OVERVOLTAGE_INTERRUPT
+	clr_bit(BatOverVoltageInterrupt_DDR,BatOverVoltageInterrupt);	// BatOverVoltageInterrupt como entrada
+ 	// interrupcao Over voltage Battery (BatOvervoltage_interrupt PD2)
+	set_bit(EICRA, ISC10);                      // rising edge for int1
+	set_bit(EIMSK, INT0);                       // enables int1 interrupt
+	set_bit(EIFR, INTF0);                       // clears int0 interrupt
+#endif // ENABLE_HARDWARE_OVERVOLTAGE_INTERRUPT 
+ 
+#ifdef ENABLE_HARDWARE_ENABLE_SWITCH_INTERRUPT   
 	clr_bit(Enable_DDR,Enable);					// Enable como entrada
 	set_bit(Enable_PORT,Enable);				// Enable com pull-up
 	
@@ -80,19 +113,20 @@ int main(void)
     set_bit(EICRA, ISC11);                      // falling edge for int1
     set_bit(EIMSK, INT1);                       // enables int1 interrupt
     set_bit(EIFR, INTF1);                       // clears int1 interrupt
-	
-	// interrupcao Over voltage Battery (BatOvervoltage_interrupt PD2)
-	set_bit(EICRA, ISC10);                      // rising edge for int1
-	set_bit(EIMSK, INT0);                       // enables int1 interrupt
-	set_bit(EIFR, INTF0);                       // clears int0 interrupt
-	*/	
-    
-    // reset as input pull-up against noise
-    clr_bit(DDRC, PC6);
-    set_bit(PORTC, PC6);
-	
+#endif // ENABLE_HARDWARE_ENABLE_SWITCH_INTERRUPT
+
+#ifdef MACHINE_ON
+    print_configurations();
+#endif // MACHINE_ON
+
     sei();
-	
+}
+
+int main(void)
+{
+
+    init();
+   
 	for(;;){
 		#ifdef WATCHDOG_ON
             wdt_reset();
@@ -132,6 +166,7 @@ int main(void)
 ISR(BADISR_vect)
 {
     for(;;){
+        pwm_reset();
         VERBOSE_MSG_ERROR(usart_send_string("\nFATAL ERROR: BAD ISR."));
         #ifdef WATCHDOG_ON
             VERBOSE_MSG_ERROR(usart_send_string("WAITING FOR WATCHDOG TO RESET...\n"));
