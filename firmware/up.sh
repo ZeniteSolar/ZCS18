@@ -1,3 +1,5 @@
+
+#cppcheck  --force --std=c99 --language=c src/
 make clean
 rm -rf bin obj
 make all
