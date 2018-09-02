@@ -81,8 +81,8 @@ inline void set_machine_initial_state(void)
  */
 inline void check_buffers(void)
 {
-    VERBOSE_MSG_MACHINE(usart_send_string("Checking buffers..."));
 #ifdef ADC_ON
+    VERBOSE_MSG_MACHINE(usart_send_string("Checking buffers..."));
     while(!CBUF_IsFull(cbuf_adc0));
     while(!CBUF_IsFull(cbuf_adc1));
     while(!CBUF_IsFull(cbuf_adc2));
@@ -114,21 +114,27 @@ inline void read_and_check_adcs(void)
     switch(state_machine){
         default:
         case STATE_INITIALIZING:
+#ifdef CHECK_INITIALIZING_CONDITIONS
             check_initializing_panel_voltage();
             check_initializing_panel_current();
             check_initializing_battery_voltage();
+#endif // CHECK_INITIALIZING_CONDITIONS
 
             break;
         case STATE_IDLE:
+#ifdef CHECK_IDLE_CONDITIONS
             check_idle_panel_voltage();
             check_idle_panel_current();
             check_idle_battery_voltage();
+#endif CHECK_IDLE_CONDITIONS
 
             break;
         case STATE_RUNNING:
+#ifdef CHECK_RUNNING_CONDITIONS
             check_running_panel_voltage();
             check_running_panel_current();
             check_running_battery_voltage();
+#endif // CHECK_RUNNING_CONDITIONS
 
             break;
     } 
@@ -589,11 +595,7 @@ inline void task_initializing(void)
 }
 
 /**
- * @brief waits for commands while checking the system:
- *  - checks the deadman's switch state
- *  - checks the on_off_switch state
- *  - checks the potentiometer state
- *  then if its ok, enable the system to operate
+ * @brief waits for commands while checking the system
  */
 inline void task_idle(void)
 {
@@ -647,8 +649,16 @@ inline void task_running(void)
 
     if(system_flags.mppt_on && system_flags.enable){
 #ifdef PWM_ON
+
+#ifdef CONVERTER_TEST_WITH_FIXED_DUTYCYCLE
+        control.D = CONVERTER_TEST_WITH_FIXED_DUTYCYCLE_DT_VALUE;
+        set_pwm_duty_cycle(control.D);
+#else
         pwm_compute();
+#endif // CONVERTER_TEST_WITH_FIXED_DUTYCYCLE
+
 #endif //PWM_ON
+
     }else{
         set_state_idle();
     }

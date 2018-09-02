@@ -93,7 +93,6 @@ typedef struct control{
 	int32_t	    dpi;			// value of delta power in WATTS
     uint32_t    mpp_pi;
 #endif
-
 }control_t;
 
 
