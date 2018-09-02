@@ -45,14 +45,11 @@
 #define set_pwm_duty_cycle(d)       OCR1A = d      //!< apply duty cycle 'd'
 #define set_pwm_off()               OCR1A = 0;     //!< d = 0
 
-void sweep(void);
-uint8_t sweep_completed;
-
 // pwm functions
 void pwm_init(void);
 void pwm_reset(void);
 void pwm_compute(void);
-void pwm_treat_fault(void);
+void pwm_limit(void);
 uint8_t pwm_zero_width(uint16_t duty_cycle);
 
 // // pwm variables

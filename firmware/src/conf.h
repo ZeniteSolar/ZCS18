@@ -79,6 +79,15 @@
 #define MACHINE_CLK_DIVIDER_VALUE           4       //<! machine_run clock divider
 #define MACHINE_FREQUENCY                   (MACHINE_TIMER_FREQUENCY)/(MACHINE_CLK_DIVIDER_VALUE)
 
+// MPPT ALGORITHMS
+#define ENABLE_PERTURB_AND_OBSERVE
+#define ENABLE_SWEEP
+#define ENABLE_ZERO_POWER_DETECTION
+#ifdef ENABLE_ZERO_POWER_DETECTION
+#define ZERO_POWER_DETECTION_THRESHOLD		100
+#endif // ENABLE_ZERO_POWER_DETECTION
+
+
 #define VSCALE                              (uint16_t)1000
 #define ISCALE                              (uint16_t)1000
 #define PSCALE                              (uint32_t)(VSCALE)*(ISCALE)

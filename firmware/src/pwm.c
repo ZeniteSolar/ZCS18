@@ -34,9 +34,14 @@ void pwm_init()
     OCR1A = PWM_D_INITIAL;                              // set initial Duty Cycle
     set_bit(PWM_DDR, PWM);                          // PWM as output
 
+#ifdef ENABLE_SWEEP
     sweep_completed = 0;
+#endif // ENABLE_SWEEP
+#ifdef ENABLE_ZERO_POWER_DETECTION
+    zero_power_detection_counter = 0;
+#endif // ENABLE_ZERO_POWER_DETECTION 
 
-#endif
+#endif // PWM_ON
 }
 
 /**
@@ -51,58 +56,6 @@ inline void pwm_reset(void)
     VERBOSE_MSG_PWM(usart_send_string("PWM turned off!\n"));
 }
 
-inline void sweep(void)
-{
-
-    static uint8_t updown = 0;
-    static uint8_t periods = 1;
-    static uint8_t last_up = 0;
-
-    if(control.pi[0] > control.mpp_pi){
-        control.mpp_pi = control.pi[0];
-        control.mpp_vi = control.vi[0];
-        control.mpp_ii = control.ii[0];
-        control.mpp_D = control.D;
-    }
-
-    if(updown){
-        if(control.D > PWM_D_MIN){
-            control.D -= PWM_D_MIN_STEP;
-        }else{
-            updown ^= 1;
-            periods--;
-        }
-    }else{
-        if(control.D < PWM_D_MAX-PWM_D_MIN_STEP){
-            control.D += PWM_D_MIN_STEP;
-        }else{
-            updown ^= 1;
-        }
-    }
-    if(periods == 0)    last_up = 1;
-
-    if(last_up){
-        if(control.D < PWM_D_INITIAL){
-            control.D += PWM_D_MIN_STEP;
-        }else{
-            sweep_completed = 1;
-            control.D = control.mpp_D;
-        }
-    }
-    if(sweep_completed){
-        VERBOSE_MSG_MACHINE(usart_send_string("\n\nGOT MPPT point: "));
-        VERBOSE_MSG_MACHINE(usart_send_uint32(control.mpp_pi));
-        VERBOSE_MSG_MACHINE(usart_send_char(' '));
-        VERBOSE_MSG_MACHINE(usart_send_uint16(control.mpp_vi));
-        VERBOSE_MSG_MACHINE(usart_send_char(' '));
-        VERBOSE_MSG_MACHINE(usart_send_uint16(control.mpp_ii));
-        VERBOSE_MSG_MACHINE(usart_send_char(' '));
-        VERBOSE_MSG_MACHINE(usart_send_uint8(control.mpp_D)); 
-        VERBOSE_MSG_MACHINE(usart_send_char('\n'));
-
-    }
-
-}
 
 /**
  * @brief computs duty-cycle for PWM
@@ -116,29 +69,38 @@ inline void pwm_compute(void)
     control.pi[0] = (uint32_t)control.vi[0] * (uint32_t)control.ii[0];
     control.dpi = ((int32_t)control.pi[0]) -((int32_t)control.pi[1]);
     control.dvi = ((int32_t)control.vi[0]) -((int32_t)control.vi[1]);
+    control.io[0] = control.ii[0] * (((PWM_TOP)-control.D)/control.D);
+    control.po[0] = (uint32_t)control.vo[0] * (uint32_t)control.io[0]; 
 
+#ifdef ENABLE_SWEEP
     if(sweep_completed){
+        #ifdef ENABLE_PERTURB_AND_OBSERVE
         perturb_and_observe();
+        #endif // ENABLE_PERTURB_AND_OBSERVE
+
+        // ZERO POWER DETECTION
+        #ifdef ENABLE_ZERO_POWER_DETECTION
+        if(control.pi[0] < RUNNING_PANEL_POWER_MIN){
+            if(zero_power_detection_counter++ >= ZERO_POWER_DETECTION_THRESHOLD){
+                sweep_completed = 0;
+            }
+        }else{
+            zero_power_detection = 0;
+        }
+        #endif //ENABLE_ZERO_POWER_DETECTION
+
     }else{
         sweep();
     }
+#else
 
-    VERBOSE_MSG_PWM(usart_send_string("PeO. "));
-	
-	// treats faults
-    /*if(error_flags.overvoltage || error_flags.overcurrent){
-        VERBOSE_MSG_PWM(usart_send_string("Err. "));
-        error_flags.overvoltage = error_flags.overcurrent = 0;
-        if(control.D >= (D_STEP+1))      control.D -= (D_STEP+1);
-        else                    control.D = 0;
-    }*/
+#ifdef ENABLE_PERTURB_AND_OBSERVE
+    perturb_and_observe();
+#endif // ENABLE_PERTURB_AND_OBSERVE
 
-    // apply some threshhold saturation limits
-    if(control.D > PWM_D_MAX)        control.D = PWM_D_MAX;
-    else if(control.D < PWM_D_MIN)   control.D = PWM_D_MIN;
+#endif // ENABLE SWEEP
 
-    // apply dutycycle
-    VERBOSE_MSG_PWM(usart_send_string("c.D. "));
+    pwm_limit();
     set_pwm_duty_cycle(control.D);
 
     VERBOSE_MSG_PWM(usart_send_string("PWM computed as: "));
@@ -151,9 +113,20 @@ inline void pwm_compute(void)
     control.vi[1] = control.vi[0];
     control.ii[1] = control.ii[0];
     control.vo[1] = control.vo[0];
+    control.io[1] = control.io[0];
+    control.po[1] = control.po[0];
 
 
 #endif
+}
+
+/**
+ * @brief apply some threshhold saturation limits 
+ */
+void pwm_limit(void)
+{
+    if(control.D > PWM_D_MAX)        control.D = PWM_D_MAX;
+    else if(control.D < PWM_D_MIN)   control.D = PWM_D_MIN;
 }
 
 /**
