@@ -43,7 +43,7 @@
 
 // // pwm macros
 #define set_pwm_duty_cycle(d)       OCR1A = d      //!< apply duty cycle 'd'
-#define set_pwm_off()               OCR1A = 0;     //!< d = 0
+#define set_pwm_off()               OCR1A = 0      //!< d = 0
 
 // pwm functions
 void pwm_init(void);

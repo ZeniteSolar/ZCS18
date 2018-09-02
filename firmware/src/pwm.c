@@ -56,15 +56,28 @@ inline void pwm_reset(void)
     VERBOSE_MSG_PWM(usart_send_string("PWM turned off!\n"));
 }
 
+/**
+ * @brief 
+ */
+void zero_power_detection(void)
+{
+#ifdef ENABLE_ZERO_POWER_DETECTION
+    if(control.pi[0] < RUNNING_PANEL_POWER_MIN){
+        if(zero_power_detection_counter++ >= ZERO_POWER_DETECTION_THRESHOLD){
+            sweep_completed = 0;
+        }
+    }else{
+        zero_power_detection_counter = 0;
+    }
+#endif //ENABLE_ZERO_POWER_DETECTION
+}
 
 /**
  * @brief computs duty-cycle for PWM
  */
-
-inline void pwm_compute(void)
+void pwm_compute(void)
 {	
 #ifdef MACHINE_ON
-
     // Compute derivates
     control.pi[0] = (uint32_t)control.vi[0] * (uint32_t)control.ii[0];
     control.dpi = ((int32_t)control.pi[0]) -((int32_t)control.pi[1]);
@@ -75,24 +88,33 @@ inline void pwm_compute(void)
 #ifdef ENABLE_SWEEP
     if(sweep_completed){
         #ifdef ENABLE_PERTURB_AND_OBSERVE
-        perturb_and_observe();
-        #endif // ENABLE_PERTURB_AND_OBSERVE
-
-        // ZERO POWER DETECTION
-        #ifdef ENABLE_ZERO_POWER_DETECTION
-        if(control.pi[0] < RUNNING_PANEL_POWER_MIN){
-            if(zero_power_detection_counter++ >= ZERO_POWER_DETECTION_THRESHOLD){
-                sweep_completed = 0;
+#ifdef ENABLE_SOFT_START
+        if(soft_start_completed){
+#ifdef SWEEP
+            if(control.D < control.mpp){
+#else
+            if(control.D < PWM_D_NOMINAL){
+#endif
+                control.D++;
+            }else{
+                soft_start_completed = 1;
             }
         }else{
-            zero_power_detection = 0;
+            perturb_and_observe();
         }
-        #endif //ENABLE_ZERO_POWER_DETECTION
+#else   // ENABLE_SOFT_START
+        perturb_and_observe();
+#endif  // ENABLE_SOFT_START
+        #endif // ENABLE_PERTURB_AND_OBSERVE
+
+#ifdef ENABLE_ZERO_POWER_DETECTION
+        zero_power_detection();
+#endif //ENABLE_ZERO_POWER_DETECTION
 
     }else{
         sweep();
     }
-#else
+#else // ENABLE_SWEEP
 
 #ifdef ENABLE_PERTURB_AND_OBSERVE
     perturb_and_observe();
@@ -107,7 +129,6 @@ inline void pwm_compute(void)
     VERBOSE_MSG_PWM(usart_send_uint16(OCR1A));
     VERBOSE_MSG_PWM(usart_send_char('\n'));
 
-
     // recycles
     control.pi[1] = control.pi[0];
     control.vi[1] = control.vi[0];
@@ -115,7 +136,6 @@ inline void pwm_compute(void)
     control.vo[1] = control.vo[0];
     control.io[1] = control.io[0];
     control.po[1] = control.po[0];
-
 
 #endif
 }
@@ -129,22 +149,4 @@ void pwm_limit(void)
     else if(control.D < PWM_D_MIN)   control.D = PWM_D_MIN;
 }
 
-/**
- * @brief decreases pwm by 10% in case of mosfet fault detected by IR2127.
- */
-inline void pwm_treat_fault(void)
-{
-    /*
-#ifdef MACHINE_ON
-    if(control.D_raw_target > 10)
-        control.D_raw_target -= 6;      // -10%
-#endif
-        */
-    /*
-    if(OCR1A > 10)
-        OCR1A -= 6;
-    VERBOSE_MSG_PWM(usart_send_string("\nPWM fault treated\n"));
-    VERBOSE_MSG_ERROR(usart_send_string("\nPWM fault treated\n"));
-    */
-}
 
