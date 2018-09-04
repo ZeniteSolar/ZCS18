@@ -21,12 +21,13 @@ inline void perturb_and_observe(void)
 /**
  * @brief sweep D over full range to find MPP
  */
-inline void sweep(void)
+void sweep(void)
 {
 
-    static uint8_t updown = 0;
-    static uint8_t periods = 1;
-    static uint8_t last_up = 0;
+    static uint8_t sweep_updown = 0;
+    static uint8_t sweep_periods = 0;
+    static uint8_t sweep_last_up = 0;
+
 
     if(control.pi[0] > control.mpp_pi){
         control.mpp_pi = control.pi[0];
@@ -35,23 +36,23 @@ inline void sweep(void)
         control.mpp_D = control.D;
     }
 
-    if(updown){
+    if(sweep_updown){
         if(control.D > PWM_D_MIN){
             control.D -= PWM_D_MIN_STEP;
         }else{
-            updown ^= 1;
-            periods--;
+            sweep_updown ^= 1;
+            sweep_periods--;
         }
     }else{
         if(control.D < PWM_D_MAX-PWM_D_MIN_STEP){
             control.D += PWM_D_MIN_STEP;
         }else{
-            updown ^= 1;
+            sweep_updown ^= 1;
         }
     }
-    if(periods == 0)    last_up = 1;
+    if(sweep_periods == 0)    sweep_last_up = 1;
 
-    if(last_up){
+    if(sweep_last_up){
         if(control.D < PWM_D_INITIAL){
             control.D += PWM_D_MIN_STEP;
         }else{
