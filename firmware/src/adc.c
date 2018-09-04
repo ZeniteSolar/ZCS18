@@ -120,20 +120,37 @@ void adc_init(void)
             | (1 << ADPS1)
             | (1 << ADPS0);
 
+    // TIMER configurations
 
-
-    // configuracao do Timer TC0 --> TIMER DO ADC
     clr_bit(PRR0, PRTIM0);                          // Activates clock to timer0
-    //set_bit(DDRD, PD5);
-    //set_bit(DDRD, PD6);
-    TCCR0A  =   (1 << WGM01) | (0 << WGM00)         // Timer 0 in Mode 2 = CTC (clear on compare)
-            | (0 << COM0B1) | (0 << COM0B0)         // do nothing with OC0B
-            | (0 << COM0A1) | (0 << COM0A0);        // Normal port operation
-    TCCR0B  =   (0 << WGM02)                        // Timer 0 in Mode 2 = CTC (clear on compare)
-            | (0 << FOC0A) | (0 << FOC0B)           // dont force outputs
-            | (1 << CS02) | (0 << CS01) | (0 << CS00); // clock enabled, prescaller = 64
+    // MODE 2 -> CTC with TOP on OCR1
+    TCCR0A  =   (1 << WGM01) | (0 << WGM00)         // mode 2
+            | (0 << COM0B1) | (0 << COM0B0)         // do nothing 
+            | (0 << COM0A1) | (0 << COM0A0);        // do nothing
 
-	OCR0A  =    20;                                 // Valor para igualdade de comparacao A para frequencia de 5kHz
+    TCCR0B  =
+#if ADC_TIMER_PRESCALER ==     1
+                (0 << CS02) | (0 << CS01) | (1 << CS00) // Prescaler N=1
+#elif ADC_TIMER_PRESCALER ==   8
+                (0 << CS02) | (1 << CS01) | (0 << CS00) // Prescaler N=8
+#elif ADC_TIMER_PRESCALER ==   32
+                (0 << CS02) | (1 << CS01) | (1 << CS00) // Prescaler N=32
+#elif ADC_TIMER_PRESCALER ==   64
+                (1 << CS02) | (0 << CS01) | (0 << CS00) // Prescaler N=64
+#elif ADC_TIMER_PRESCALER ==   128
+                (1 << CS02) | (0 << CS01) | (1 << CS00) // Prescaler N=128
+#elif ADC_TIMER_PRESCALER ==   256
+                (1 << CS02) | (1 << CS01) | (0 << CS00) // Prescaler N=256
+#elif ADC_TIMER_PRESCALER ==   1024
+                (1 << CS02) | (1 << CS01) | (1 << CS00) // Prescaler N=1024
+#else
+                0
+#endif
+                | (0 << WGM02);      // mode 2
+
+    OCR0A = ADC_TIMER_TOP;                       	// OCR2A = TOP = fcpu/(N*2*f) -1
+
+
     TIMSK0 |=   (1 << OCIE0A);                      // Ativa a interrupcao na igualdade de comparação do TC0 com OCR0A
 
     init_buffers();

@@ -23,6 +23,13 @@
 #define ADC_LAST_CHANNEL 3                  //*< quantity of channels used
 //#define ADC_8BITS
 
+// Equations for mode 2 (CTC with TOP OCR2A)
+// Note the resolution. For example.. at 150hz, ICR1 = PWM_TOP = 159, so it
+//#define QUOTIENT  (((uint32_t)MACHINE_TIMER_PRESCALER)*((uint32_t)MACHINE_TIMER_FREQUENCY))
+//#define ADC_TIMER_TOP (0.5*(F_CPU)/QUOTIENT)
+#define ADC_TIMER_FREQUENCY     ((uint32_t)(ADC_FREQUENCY)*(uint8_t)(ADC_LAST_CHANNEL))
+#define ADC_TIMER_TOP ((F_CPU)/(2.*((uint32_t)ADC_TIMER_PRESCALER)*((uint32_t)ADC_TIMER_FREQUENCY)) -1)
+
 uint8_t adc_data_ready;
 uint16_t avg_sum_samples;
 void calc_avg(void);
