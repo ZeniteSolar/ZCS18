@@ -100,14 +100,14 @@ inline void read_and_check_adcs(void)
 { 
 #ifdef ADC_ON
     calc_avg();
-    uint32_t tmp;
-    tmp = AVG_PANEL_VOLTAGE * ADC_PANEL_VOLTAGE_ANGULAR_COEF ;
+    uint64_t tmp;
+    tmp = (uint64_t)(uint16_t)AVG_PANEL_VOLTAGE * (uint32_t)ADC_PANEL_VOLTAGE_ANGULAR_COEF ;
     control.vi[0] = tmp >> 10;
 //        +ADC_PANEL_VOLTAGE_LINEAR_COEF;
-    tmp = AVG_PANEL_CURRENT * ADC_PANEL_CURRENT_ANGULAR_COEF ; 
+    tmp = (uint64_t)(uint16_t)AVG_PANEL_CURRENT * (uint32_t)ADC_PANEL_CURRENT_ANGULAR_COEF ; 
     control.ii[0] = tmp >> 10;
 //        +ADC_PANEL_CURRENT_LINEAR_COEF;
-    tmp = AVG_BATTERY_VOLTAGE * ADC_BATTERY_VOLTAGE_ANGULAR_COEF ; 
+    tmp = (uint64_t)(uint16_t)AVG_BATTERY_VOLTAGE * (uint32_t)ADC_BATTERY_VOLTAGE_ANGULAR_COEF ; 
     control.vo[0] = tmp >> 10;
 //        +ADC_BATTERY_VOLTAGE_LINEAR_COEF;
 
@@ -126,7 +126,7 @@ inline void read_and_check_adcs(void)
             check_idle_panel_voltage();
             check_idle_panel_current();
             check_idle_battery_voltage();
-#endif CHECK_IDLE_CONDITIONS
+#endif //CHECK_IDLE_CONDITIONS
 
             break;
         case STATE_RUNNING:
