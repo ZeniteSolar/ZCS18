@@ -25,6 +25,8 @@ void zero_power_detection(void);
 
 #ifdef ENABLE_SWEEP
 uint8_t sweep_completed;
+uint8_t sweep_last_up;
+uint8_t sweep_updown;
 void sweep(void);
 #endif // ENABLE_SWEEP
 

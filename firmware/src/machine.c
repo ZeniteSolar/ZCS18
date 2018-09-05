@@ -381,6 +381,17 @@ inline void set_state_running(void)
 {
     VERBOSE_MSG_MACHINE(usart_send_string("\n>>>RUNNING STATE\n"));
     state_machine = STATE_RUNNING;
+#ifdef ENABLE_PERTURB_AND_OBSERVE
+#ifndef ENABLE_SOFT_START
+#ifndef ENABLE_SWEEP
+    control.D = PWM_D_NOMINAL;
+#endif
+#endif
+#endif
+
+#ifdef ENABLE_SWEEP
+    sweep_periods = (PERIODS_TO_SWEEP-1);
+#endif
 }
 
 /**
@@ -444,7 +455,7 @@ inline void print_system_flags(void)
 */
 inline void print_error_flags(void)
 {
-    VERBOSE_MSG_MACHINE(usart_send_string("errFl: "));
+    VERBOSE_MSG_MACHINE(usart_send_string(" errFl: "));
     VERBOSE_MSG_MACHINE(usart_send_char(48+error_flags.panel_overvoltage));
     VERBOSE_MSG_MACHINE(usart_send_char(48+error_flags.panel_undervoltage));
     VERBOSE_MSG_MACHINE(usart_send_char(48+error_flags.panel_overcurrent));
@@ -482,8 +493,8 @@ inline void print_control_vi(void)
     VERBOSE_MSG_MACHINE(usart_send_string(" Vp: "));
     VERBOSE_MSG_MACHINE(usart_send_uint16(control.vi[0]));
     VERBOSE_MSG_MACHINE(usart_send_char(' '));
-    VERBOSE_MSG_MACHINE(usart_send_uint16(control.vi[1]));
-    VERBOSE_MSG_MACHINE(usart_send_char(' '));
+    //VERBOSE_MSG_MACHINE(usart_send_uint16(control.vi[1]));
+    //VERBOSE_MSG_MACHINE(usart_send_char(' '));
 }
 
 /**
@@ -503,16 +514,36 @@ inline void print_control_ii(void)
     VERBOSE_MSG_MACHINE(usart_send_string(" Ip: "));
     VERBOSE_MSG_MACHINE(usart_send_uint16(control.ii[0]));
     VERBOSE_MSG_MACHINE(usart_send_char(' '));
-    VERBOSE_MSG_MACHINE(usart_send_uint16(control.ii[1]));
-    VERBOSE_MSG_MACHINE(usart_send_char(' '));
+    //VERBOSE_MSG_MACHINE(usart_send_uint16(control.ii[1]));
+    //VERBOSE_MSG_MACHINE(usart_send_char(' '));
 } 
 
+/**
+* @brief prints control.io[0]infos
+*/
+inline void print_control_io(void)
+{
+    VERBOSE_MSG_MACHINE(usart_send_string(" Ib: "));
+    VERBOSE_MSG_MACHINE(usart_send_uint16(control.io[0]));
+    VERBOSE_MSG_MACHINE(usart_send_char(' '));
+    //VERBOSE_MSG_MACHINE(usart_send_uint16(control.io[1]));
+    //VERBOSE_MSG_MACHINE(usart_send_char(' '));
+} 
 /**
 * @brief prints control dii infos
 */
 inline void print_control_dii(void)
 {
     VERBOSE_MSG_MACHINE(usart_send_int32(control.dii));
+    VERBOSE_MSG_MACHINE(usart_send_char(' '));
+}
+ 
+/**
+* @brief prints control dio infos
+*/
+inline void print_control_dio(void)
+{
+    VERBOSE_MSG_MACHINE(usart_send_int32(control.dio));
     VERBOSE_MSG_MACHINE(usart_send_char(' '));
 }
  
@@ -525,8 +556,8 @@ inline void print_control_vo(void)
     VERBOSE_MSG_MACHINE(usart_send_string(" Vb: "));
     VERBOSE_MSG_MACHINE(usart_send_uint16(control.vo[0]));
     VERBOSE_MSG_MACHINE(usart_send_char(' '));
-    VERBOSE_MSG_MACHINE(usart_send_uint16(control.vo[1]));
-    VERBOSE_MSG_MACHINE(usart_send_char(' '));
+    //VERBOSE_MSG_MACHINE(usart_send_uint16(control.vo[1]));
+    //VERBOSE_MSG_MACHINE(usart_send_char(' '));
 } 
 
 /**
@@ -540,7 +571,7 @@ inline void print_control_dvo(void)
  
 
 /**
-* @brief prints control.vo[0]infos
+* @brief prints control pi infos
 */
 inline void print_control_pi(void)
 {
@@ -548,15 +579,35 @@ inline void print_control_pi(void)
 #ifdef ADC_8BITS
     VERBOSE_MSG_MACHINE(usart_send_uint16(control.pi[0]));
     VERBOSE_MSG_MACHINE(usart_send_char(' '));
-    VERBOSE_MSG_MACHINE(usart_send_uint16(control.pi[1]));
-    VERBOSE_MSG_MACHINE(usart_send_char(' '));
+    //VERBOSE_MSG_MACHINE(usart_send_uint16(control.pi[1]));
+    //VERBOSE_MSG_MACHINE(usart_send_char(' '));
 #else
     VERBOSE_MSG_MACHINE(usart_send_uint32(control.pi[0]));
     VERBOSE_MSG_MACHINE(usart_send_char(' '));
-    VERBOSE_MSG_MACHINE(usart_send_uint32(control.pi[1]));
-    VERBOSE_MSG_MACHINE(usart_send_char(' ')); 
+    //VERBOSE_MSG_MACHINE(usart_send_uint32(control.pi[1]));
+    //VERBOSE_MSG_MACHINE(usart_send_char(' ')); 
 #endif
 }
+ 
+/**
+* @brief prints control po infos
+*/
+inline void print_control_po(void)
+{
+    VERBOSE_MSG_MACHINE(usart_send_string(" Pb: "));
+#ifdef ADC_8BITS
+    VERBOSE_MSG_MACHINE(usart_send_uint16(control.po[0]));
+    VERBOSE_MSG_MACHINE(usart_send_char(' '));
+    //VERBOSE_MSG_MACHINE(usart_send_uint16(control.po[1]));
+    //VERBOSE_MSG_MACHINE(usart_send_char(' '));
+#else
+    VERBOSE_MSG_MACHINE(usart_send_uint32(control.po[0]));
+    VERBOSE_MSG_MACHINE(usart_send_char(' '));
+    //VERBOSE_MSG_MACHINE(usart_send_uint32(control.po[1]));
+    //VERBOSE_MSG_MACHINE(usart_send_char(' ')); 
+#endif
+}
+ 
 
 /**
 * @brief prints control dpi infos
@@ -566,6 +617,7 @@ inline void print_control_dpi(void)
     VERBOSE_MSG_MACHINE(usart_send_int32(control.dpi));
     VERBOSE_MSG_MACHINE(usart_send_char(' '));
 }
+
  
 
 /**
@@ -767,12 +819,18 @@ void print_infos(void)
                 //print_control_dvo();
                 break;
             case 9:
-                print_control_pi();
+                print_control_io();
                 break;
             case 10:
-                //print_control_dpi();
+                print_control_pi();
                 break;
             case 11:
+                //print_control_dpi();
+                break;
+            case 12:
+                print_control_po();
+                break;
+            case 13:
                 //print_control_others(); 
             default:
                 VERBOSE_MSG_MACHINE(usart_send_char('\n'));

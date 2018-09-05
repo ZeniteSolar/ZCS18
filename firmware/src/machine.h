@@ -119,10 +119,12 @@ void print_control_d(void);
 void print_control_vi(void);
 void print_control_dvi(void);
 void print_control_ii(void);
+void print_control_io(void);
 void print_control_dii(void);
 void print_control_vo(void);
 void print_control_dvo(void);
 void print_control_pi(void);
+void print_control_po(void);
 void print_control_dpi(void);
 
 // machine tasks

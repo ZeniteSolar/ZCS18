@@ -46,7 +46,7 @@
 //#define PWM_TEST 
 //#define PEO_TEST
 
-#define PWM_FREQUENCY                       100000          //<! pwm frequency in Hz
+#define PWM_FREQUENCY                       99000          //<! pwm frequency in Hz
 #define PWM_D_NOMINAL                       0.6*(PWM_TOP)   //!< float value from 0 to 1
 #define PWM_D_MIN                           0.2*(PWM_TOP)  //!< minimum D
 #define PWM_D_MAX                           0.96*(PWM_TOP)   //!< maximum D
@@ -58,8 +58,8 @@
 
 #ifdef ADC_ON
 // ADC CONFIGURATION
-#define ADC_FREQUENCY                       10000
-#define ADC_TIMER_PRESCALER                 128
+#define ADC_FREQUENCY                       20000
+#define ADC_TIMER_PRESCALER                 64
 #define ADC_PANEL_VOLTAGE                   adc0
 #define ADC_PANEL_CURRENT                   adc1
 #define ADC_BATTERY_VOLTAGE                 adc2
@@ -82,15 +82,16 @@
 #define MACHINE_FREQUENCY                   (MACHINE_TIMER_FREQUENCY)/(MACHINE_CLK_DIVIDER_VALUE)
 
 // MPPT ALGORITHMS
+#define ENABLE_SWEEP
 #define ENABLE_PERTURB_AND_OBSERVE
-#ifdef ENABLE_PERTURB_AND_OBSERVE
 #define ENABLE_SOFT_START
-#endif // ENABLE_PERTURB_AND_OBSERVE 
 #define ENABLE_ZERO_POWER_DETECTION
 #ifdef ENABLE_ZERO_POWER_DETECTION
 #define ZERO_POWER_DETECTION_THRESHOLD		100
 #endif // ENABLE_ZERO_POWER_DETECTION
-#define ENABLE_SWEEP
+#ifdef ENABLE_SWEEP
+#define PERIODS_TO_SWEEP                    2
+#endif // ENABLE_SWEEP
 
 #ifdef CONVERTER_TEST_WITH_FIXED_DUTYCYCLE
 #undef ENABLE_SOFT_START

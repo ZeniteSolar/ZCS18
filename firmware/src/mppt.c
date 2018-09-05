@@ -23,12 +23,6 @@ inline void perturb_and_observe(void)
  */
 void sweep(void)
 {
-
-    static uint8_t sweep_updown = 0;
-    static uint8_t sweep_periods = 0;
-    static uint8_t sweep_last_up = 0;
-
-
     if(control.pi[0] > control.mpp_pi){
         control.mpp_pi = control.pi[0];
         control.mpp_vi = control.vi[0];

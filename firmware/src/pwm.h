@@ -52,6 +52,10 @@ void pwm_compute(void);
 void pwm_limit(void);
 uint8_t pwm_zero_width(uint16_t duty_cycle);
 
+#ifdef ENABLE_SWEEP
+uint8_t sweep_periods;
+#endif // ENABLE_SWEEP
+
 // // pwm variables
 uint8_t pwm_d_clk_div;
 
