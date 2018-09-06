@@ -3,6 +3,34 @@
  */ 
 #include "mppt.h"
 
+/**
+ * @brief tries to limit input power to safe levels varying duty cycle against
+ * MPP
+ */
+inline void panel_power_limit(void)
+{
+    if(control.pi[0] > RUNNING_PANEL_POWER_MAX){
+        VERBOSE_MSG_MACHINE(usart_send_string("\n\n>>> PANEL POWER LIMIT!\n"));
+        if(control.pi[0] < control.pi[1])
+            control.D += 2*control.D_step;
+        else
+            control.D -= 2*control.D_step;
+    }
+}
+
+/**
+ * @brief tries to limit battery voltage to its maximum varying duty cycle
+ */
+inline void battery_voltage_limit(void)
+{
+    if(control.vo[0] > RUNNING_BATTERY_VOLTAGE_MAX){
+        VERBOSE_MSG_MACHINE(usart_send_string("\n\n>>> BATTERY VOLTAGE LIMIT!\n"));
+        if(control.vo[0] < control.vo[1])
+            control.D += 4*control.D_step;
+        else
+            control.D -= 4*control.D_step;
+    }
+}
 
 /**
  * @brief simple perturb and observe
@@ -11,11 +39,8 @@
  */
 inline void perturb_and_observe(void)
 {   
-    static int8_t d_step = PWM_D_STEP;
-    
-    if(control.dpi <= 0)    d_step = -d_step;
-    control.D += d_step;
-
+    if(control.dpi <= 0)    control.D_step = -control.D_step;
+    control.D += control.D_step;
 }
 
 /**
@@ -23,6 +48,7 @@ inline void perturb_and_observe(void)
  */
 void sweep(void)
 {
+#ifdef ENABLE_SWEEP
     if(control.pi[0] > control.mpp_pi){
         control.mpp_pi = control.pi[0];
         control.mpp_vi = control.vi[0];
@@ -72,5 +98,6 @@ void sweep(void)
     }
 #endif // ENABLE_SWEEP
 
+#endif // ENABLE_SWEEP
 }
 

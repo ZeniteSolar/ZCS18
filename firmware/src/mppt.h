@@ -30,6 +30,14 @@ uint8_t sweep_updown;
 void sweep(void);
 #endif // ENABLE_SWEEP
 
+#ifdef ENABLE_PANEL_POWER_LIMIT
+void panel_power_limit(void);
+#endif // ENABLE_PANEL_POWER_LIMIT
+
+#ifdef ENABLE_SOFTWARE_BATTERY_VOLTAGE_LIMIT
+void battery_voltage_limit(void);
+#endif // ENABLE_SOFTWARE_BATTERY_VOLTAGE_LIMIT
+
 #ifdef ENABLE_PERTURB_AND_OBSERVE
 void perturb_and_observe(void);
 #endif // ENABLE_PERTURB_AND_OBSERVE 
