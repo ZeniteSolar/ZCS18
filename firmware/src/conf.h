@@ -73,6 +73,14 @@
 //#define ADC_PANEL_CURRENT_LINEAR_COEF       0
 #define ADC_BATTERY_VOLTAGE_ANGULAR_COEF    64962 //~(60000/1024)
 //#define ADC_BATTERY_VOLTAGE_LINEAR_COEF     0
+
+#define FAKE_ADC_ON
+#ifdef FAKE_ADC_ON
+#define FAKE_ADC0_VALUE                     100
+#define FAKE_ADC1_VALUE                     100
+#define FAKE_ADC2_VALUE                     200
+#endif // FAKE_ADC_ON
+
 #endif //ADC_ON
 
 #ifdef MACHINE_ON

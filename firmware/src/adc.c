@@ -177,33 +177,45 @@ ISR(ADC_vect){
     switch(ADC_CHANNEL){
         case ADC0:
             VERBOSE_MSG_ADC(usart_send_string(" \tadc0: "));
+#ifdef FAKE_ADC_ON
+            CBUF_Push(cbuf_adc0, FAKE_ADC0_VALUE); 
+#else // FAKE_ADC_ON
 #ifdef ADC_8BITS
             CBUF_Push(cbuf_adc0, ADCH); 
-#else
+#else // ADC_8BITS
             CBUF_Push(cbuf_adc0, ADC); 
-#endif
+#endif // ADC_8BITS
+#endif // FAKE_ADC_ON
             calc_ma_adc0();
             ma_adc0_sum += ma_adc0;
             ADC_CHANNEL++;
             break;
         case ADC1:
             VERBOSE_MSG_ADC(usart_send_string(" \tadc1: "));
+#ifdef FAKE_ADC_ON
+            CBUF_Push(cbuf_adc0, FAKE_ADC0_VALUE); 
+#else // FAKE_ADC_ON
 #ifdef ADC_8BITS
             CBUF_Push(cbuf_adc1, ADCH); 
-#else
+#else // ADC_8BITS     
             CBUF_Push(cbuf_adc1, ADC); 
-#endif
+#endif // ADC_8BITS 
+#endif // FAKE_ADC_ON
             calc_ma_adc1();
             ma_adc1_sum += ma_adc1;
             ADC_CHANNEL++;
             break;
         case ADC2:
             VERBOSE_MSG_ADC(usart_send_string(" \tadc2: "));
+#ifdef FAKE_ADC_ON
+            CBUF_Push(cbuf_adc0, FAKE_ADC0_VALUE); 
+#else // FAKE_ADC_ON
 #ifdef ADC_8BITS
             CBUF_Push(cbuf_adc2, ADCH);
-#else
+#else // ADC_8BITS 
             CBUF_Push(cbuf_adc2, ADC);
-#endif
+#endif // ADC_8BITS 
+#endif // FAKE_ADC_ON
             calc_ma_adc2();
             ma_adc2_sum += ma_adc2;
 			ADC_CHANNEL++;
