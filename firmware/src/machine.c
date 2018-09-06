@@ -436,6 +436,11 @@ inline void print_configurations(void)
     VERBOSE_MSG_MACHINE(usart_send_uint32( RUNNING_BATTERY_VOLTAGE_MAX ));
     VERBOSE_MSG_MACHINE(usart_send_char(','));
     VERBOSE_MSG_MACHINE(usart_send_uint32( RUNNING_BATTERY_VOLTAGE_MIN ));
+
+    VERBOSE_MSG_MACHINE(usart_send_string("\npi: "));
+    VERBOSE_MSG_MACHINE(usart_send_uint32( RUNNING_PANEL_POWER_MAX ));
+
+
     VERBOSE_MSG_MACHINE(usart_send_char('\n'));
 }
 
@@ -660,24 +665,6 @@ inline void task_idle(void)
 #endif
 
 #ifdef PWM_ON
-    /*
-    if(system_flags.mppt_on && system_flags.enable){
-        if(init_pwm_increment_divider++){
-            init_pwm_increment_divider = 0;
-            if(control.D < PWM_D_INITIAL) control.D++;
-            else{
-                if(!error_flags.all){
-                    VERBOSE_MSG_MACHINE(usart_send_string("Enjoy, the system is at its RUNNING STATE!!\n"));
-                    set_state_running();
-                }
-                else{
-                    VERBOSE_MSG_ERROR(usart_send_string("Sorry. I have have found errors in the initialilation process. \n\nI will begin to process it...\n"));
-                    set_state_error();
-                }
-            }
-        }
-        pwm_compute();
-    }*/
 
     if(system_flags.mppt_on && system_flags.enable){
         set_state_running();
