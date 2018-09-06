@@ -61,6 +61,7 @@ inline void set_machine_initial_state(void)
     error_flags.all = 0;
 
     control.D = 0;
+    control.D_step = PWM_D_STEP;
     control.pi_limit = 0;
     control.updown = 0;
     control.vi[0] = control.vi[1] = 0;
@@ -702,12 +703,7 @@ inline void task_running(void)
     if(system_flags.mppt_on && system_flags.enable){
 #ifdef PWM_ON
 
-#ifdef CONVERTER_TEST_WITH_FIXED_DUTYCYCLE
-        control.D = CONVERTER_TEST_WITH_FIXED_DUTYCYCLE_DT_VALUE;
-        set_pwm_duty_cycle(control.D);
-#else
-        pwm_compute();
-#endif // CONVERTER_TEST_WITH_FIXED_DUTYCYCLE
+    pwm_compute();
 
 #endif //PWM_ON
 
@@ -857,6 +853,13 @@ inline void machine_run(void)
 
     print_infos();
 
+#ifdef ENABLE_HARDWARE_OVERVOLTAGE_INTERRUPT
+    check_hardware_overvoltage_interrupt();
+#endif // ENABLE_HARDWARE_OVERVOLTAGE_INTERRUPT
+#ifdef ENABLE_HARDWARE_ENABLE_SWITCH_INTERRUPT
+    check_hardware_enable_switch_interrupt();
+#endif // ENABLE_HARDWARE_ENABLE_SWITCH_INTERRUPT
+
     if(machine_clk){
         machine_clk = 0;
 
@@ -910,16 +913,52 @@ inline void machine_run(void)
 }
 
 /**
+ * @brief checks PD2 for overvoltage
+ */
+inline void check_hardware_overvoltage_interrupt(void)
+{
+#ifdef ENABLE_HARDWARE_OVERVOLTAGE_INTERRUPT
+    if(tst_bit(BatOverVoltageInterrupt_PIN, BatOverVoltageInterrupt)){
+        if(!error_flags.battery_overvoltage)
+            VERBOSE_MSG_ERROR(usart_send_string("OVERVOLTAGE INTERRUPT\n"));
+        error_flags.battery_overvoltage = 1;
+        //set_state_error();
+    }else{
+        error_flags.battery_overvoltage = 0;
+    }
+#endif
+}
+
+/**
+ * @brief checks PD3 for switch
+ */
+inline void check_hardware_enable_switch_interrupt(void)
+{
+#ifdef ENABLE_HARDWARE_ENABLE_SWITCH_INTERRUPT
+    if(!tst_bit(Enable_PIN, Enable)){
+        if(system_flags.enable)
+            VERBOSE_MSG_ERROR(usart_send_string("ENABLE SWITCH INTERRUPT\n"));
+        set_state_idle();
+        system_flags.enable = 0;
+    }else{
+        system_flags.enable = 1;
+    }
+#endif
+}
+
+/**
  * @brief Interrupcao do pino de sobretensão via hardware
  */
 ISR(INT0_vect)
 {
 #ifdef ENABLE_HARDWARE_OVERVOLTAGE_INTERRUPT
-    error_flags.battery_overvoltage = 1;
-    set_state_error();
-    VERBOSE_MSG_ERROR(usart_send_string("OVERVOLTAGE INTERRUPT\n"));
-#endif
+    if(tst_bit(BatOverVoltageInterrupt_PIN, BatOverVoltageInterrupt)){
+        _delay_ms(100);
+        check_hardware_overvoltage_interrupt();
+    }
+#endif // ENABLE_HARDWARE_OVERVOLTAGE_INTERRUPT
 }
+
 
 /**
 * @brief Interrupcao do pino da chave enable via hardware
@@ -927,10 +966,11 @@ ISR(INT0_vect)
 ISR(INT1_vect)
 {    
 #ifdef ENABLE_HARDWARE_ENABLE_SWITCH_INTERRUPT
-    system_flags.enable = 0;
-    set_state_idle();
-    VERBOSE_MSG_ERROR(usart_send_string("ENABLE SWITCH INTERRUPT\n"));
-#endif
+    if(!tst_bit(Enable_PIN, Enable)){
+        _delay_ms(100);
+        check_hardware_enable_switch_interrupt();
+    }
+#endif // ENABLE_HARDWARE_ENABLE_SWITCH_INTERRUPT 
 }
 
 /**

@@ -98,21 +98,19 @@ void init(void)
 	
     // ------------------------------------------------------------------------
 #ifdef ENABLE_HARDWARE_OVERVOLTAGE_INTERRUPT
-	clr_bit(BatOverVoltageInterrupt_DDR,BatOverVoltageInterrupt);	// BatOverVoltageInterrupt como entrada
- 	// interrupcao Over voltage Battery (BatOvervoltage_interrupt PD2)
-	set_bit(EICRA, ISC10);                      // rising edge for int1
-	set_bit(EIMSK, INT0);                       // enables int1 interrupt
-	set_bit(EIFR, INTF0);                       // clears int0 interrupt
+	clr_bit(BatOverVoltageInterrupt_DDR,BatOverVoltageInterrupt);	// int0 as input
+	clr_bit(BatOverVoltageInterrupt_PORT,BatOverVoltageInterrupt);	// int0 without pullpup
+    EICRA |= (1<<ISC01) | (1<<ISC00);           // rising edge for int0
+    EIMSK |= (1<<INT0);                         // enables int0 interrupt
+    EIFR |= (1<<INTF0);                         // clears int0 interrupt
 #endif // ENABLE_HARDWARE_OVERVOLTAGE_INTERRUPT 
  
 #ifdef ENABLE_HARDWARE_ENABLE_SWITCH_INTERRUPT   
-	clr_bit(Enable_DDR,Enable);					// Enable como entrada
-	set_bit(Enable_PORT,Enable);				// Enable com pull-up
-	
-	// interrupcao do Enable (Enable PD3)
-    set_bit(EICRA, ISC11);                      // falling edge for int1
-    set_bit(EIMSK, INT1);                       // enables int1 interrupt
-    set_bit(EIFR, INTF1);                       // clears int1 interrupt
+	clr_bit(Enable_DDR,Enable);					// int1 as input
+	set_bit(Enable_PORT,Enable);				// int1 with pullup
+    EICRA |= (0<<ISC11) | (0<<ISC10);           // low level for int1
+    //EIMSK |= (1<<INT1);                         // enables int1 interrupt
+    EIFR |= (1<<INTF1);                         // clears int1 interrupt
 #endif // ENABLE_HARDWARE_ENABLE_SWITCH_INTERRUPT
 
 #ifdef MACHINE_ON

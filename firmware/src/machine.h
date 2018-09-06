@@ -69,6 +69,7 @@ typedef union error_flags{
 
 typedef struct control{
     int16_t     D;              // value converted from 0 to TOP
+    int8_t      D_step;         //
     uint8_t     pi_limit;       // value for an input power limitation controlled by the pilot
 	uint8_t		updown;			// value of comp. in function perturb_and_observe()
     uint16_t    vi[2];          // value of panel voltage in VOLTS
@@ -108,6 +109,8 @@ void check_running_panel_current(void);
 void check_running_panel_voltage(void);
 void check_running_battery_voltage(void);
 void check_buffers(void);
+void check_hardware_overvoltage_interrupt(void);
+void check_hardware_enable_switch_interrupt(void);
 
 // debug functions
 void print_configurations(void);
