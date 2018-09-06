@@ -94,6 +94,13 @@ void pwm_compute(void)
     control.dpi = (uint32_t)((int32_t)control.pi[0]) -((int32_t)control.pi[1]);
     control.dvi = (uint32_t)((int32_t)control.vi[0]) -((int32_t)control.vi[1]);
 
+#ifdef CONVERTER_TEST_WITH_FIXED_DUTYCYCLE
+
+    control.D_step = PWM_D_STEP;
+    control.D = CONVERTER_TEST_WITH_FIXED_DUTYCYCLE_DT_VALUE;
+    battery_voltage_limit();
+
+#else  // CONVERTER_TEST_WITH_FIXED_DUTYCYCLE
 
     #ifdef ENABLE_SWEEP
     #ifdef ENABLE_SOFT_START
@@ -168,6 +175,15 @@ void pwm_compute(void)
     #endif // ENABLE_SWEEP
 
 
+#endif // CONVERTER_TEST_WITH_FIXED_DUTYCYCLE
+
+    #ifdef ENABLE_PANEL_POWER_LIMIT
+    panel_power_limit();
+    #endif // ENABLE_PANEL_POWER_LIMIT
+    #ifdef ENABLE_SOFTWARE_BATTERY_VOLTAGE_LIMIT
+    battery_voltage_limit();
+    #endif // ENABLE_SOFTWARE_BATTERY_VOLTAGE_LIMIT
+
     pwm_limit();
     set_pwm_duty_cycle(control.D);
 
@@ -175,16 +191,25 @@ void pwm_compute(void)
     VERBOSE_MSG_PWM(usart_send_uint16(OCR1A));
     VERBOSE_MSG_PWM(usart_send_char('\n'));
 
+#ifdef ENABLE_IO_COMPUTATION
     control.io[0] = control.ii[0] * (((PWM_TOP)-control.D)/control.D);
+#ifdef ENABLE_PO_COMPUTATION
     control.po[0] = (uint32_t)control.vo[0] * (uint32_t)control.io[0]; 
+#endif // ENABLE_PO_COMPUTATION
+#endif // ENABLE_IO_COMPUTATION
 
     // recycles
     control.pi[1] = control.pi[0];
     control.vi[1] = control.vi[0];
     control.ii[1] = control.ii[0];
     control.vo[1] = control.vo[0];
+#ifdef ENABLE_IO_COMPUTATION
     control.io[1] = control.io[0];
+#ifdef ENABLE_PO_COMPUTATION
     control.po[1] = control.po[0];
+#endif // ENABLE_PO_COMPUTATION
+#endif // ENABLE_IO_COMPUTATION
+
 
 #endif // MACHINE_ON
 }
