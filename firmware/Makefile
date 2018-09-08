@@ -41,7 +41,7 @@ SRCDIR      :=  src
 # Project target and sources to be compiled
 MAIN 		= 	main
 # Define microcontroller settings
-MCU 		?=	atmega328pb
+MCU 		?=	atmega328p
 F_CPU		?=	16000000UL
 # Optimization
 OPT=s
@@ -96,7 +96,7 @@ CFLAGS += \
 	-std=gnu99 \
 	-mmcu=$(MCU)
 CFLAGSALT += \
-	-D__AVR_DEV_LIB_NAME__=m328pb
+	-D__AVR_DEV_LIB_NAME__=m328p
 
 LDFLAGS = -Wl,-Map=$(OBJDIR)/$(TARGET).map
 LDFLAGS += $(patsubst %,-L%,$(EXTRALIBDIRS))

@@ -9,7 +9,7 @@
  */
 void machine_init(void)
 {
-	clr_bit(PRR0, PRTIM2);                          // Activates clock
+	//clr_bit(PRR0, PRTIM2);                          // Activates clock
 
     // MODE 2 -> CTC with TOP on OCR1
     TCCR2A  =    (1 << WGM21) | (0 << WGM20)        // mode 2

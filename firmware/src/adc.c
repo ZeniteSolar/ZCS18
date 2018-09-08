@@ -21,7 +21,7 @@ void adc_init(void)
     adc.ready = 0;
     adc.select = ADC0;
 
-    clr_bit(PRR0, PRADC);                           // Activates clock to adc
+    //clr_bit(PRR0, PRADC);                           // Activates clock to adc
 
     // configuracao do ADC
     PORTC   =   0b00000000;                         // disables pull-up for adcs pins
@@ -51,7 +51,7 @@ void adc_init(void)
 
     // TIMER configurations
 
-    clr_bit(PRR0, PRTIM0);                          // Activates clock to timer0
+    //clr_bit(PRR0, PRTIM0);                          // Activates clock to timer0
     // MODE 2 -> CTC with TOP on OCR1
     TCCR0A  =   (1 << WGM01) | (0 << WGM00)         // mode 2
             | (0 << COM0B1) | (0 << COM0B0)         // do nothing 

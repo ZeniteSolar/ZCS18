@@ -7,7 +7,7 @@ void pwm_init()
 {
 #ifdef PWM_ON
       
-    clr_bit(PRR0, PRTIM1);                          // Activates clock
+    //clr_bit(PRR0, PRTIM1);                          // Activates clock
     
     // MODE 14 -> Fast PWM with TOP on ICR1
     TCCR1A  =    (1 << WGM11) | (0 << WGM10)        // mode 14
