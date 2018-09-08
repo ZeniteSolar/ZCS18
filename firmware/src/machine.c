@@ -78,29 +78,12 @@ inline void set_machine_initial_state(void)
 }
 
 /**
- * @brief checks the buffer and waits it fills up
- */
-inline void check_buffers(void)
-{
-#ifdef ADC_ON
-    VERBOSE_MSG_MACHINE(usart_send_string("Checking buffers..."));
-    while(!CBUF_IsFull(cbuf_adc0));
-    while(!CBUF_IsFull(cbuf_adc1));
-    while(!CBUF_IsFull(cbuf_adc2));
-    VERBOSE_MSG_MACHINE(usart_send_string(" \t\tdone.\n")); 
-#else
-    VERBOSE_MSG_ERROR(usart_send_string("<No buffers to check>"));
-#endif
-}
-
-
-/**
 * @brief read and checks current levels
 */
 inline void read_and_check_adcs(void)
 { 
 #ifdef ADC_ON
-    calc_avg();
+    //calc_avg();
     uint64_t tmp;
     tmp = (uint64_t)(uint16_t)AVG_PANEL_VOLTAGE * (uint32_t)ADC_PANEL_VOLTAGE_ANGULAR_COEF ;
     control.vi[0] = tmp >> 10;
@@ -411,6 +394,15 @@ inline void print_configurations(void)
 {    
 
     VERBOSE_MSG_MACHINE(usart_send_string("CONFIGURATIONS:\n"));
+    
+    VERBOSE_MSG_MACHINE(usart_send_string("\nadc_f: "));
+    VERBOSE_MSG_MACHINE(usart_send_uint16( ADC_FREQUENCY ));
+    VERBOSE_MSG_MACHINE(usart_send_char(','));
+    VERBOSE_MSG_MACHINE(usart_send_uint16( ADC_AVG_SIZE_10 ));
+    VERBOSE_MSG_MACHINE(usart_send_string("\nmachine_f: "));
+    VERBOSE_MSG_MACHINE(usart_send_uint16( MACHINE_FREQUENCY ));
+    VERBOSE_MSG_MACHINE(usart_send_char(','));
+
     VERBOSE_MSG_MACHINE(usart_send_string("\nvi: "));
     VERBOSE_MSG_MACHINE(usart_send_uint32( NOT_RUNNING_PANEL_VOLTAGE_MAX ));
     VERBOSE_MSG_MACHINE(usart_send_char(','));
@@ -628,7 +620,6 @@ inline void print_control_dpi(void)
 
 /**
  * @brief Checks if the system is OK to run:
- *  - all ring_buffers needed to be full
  *  - checks the current
  *  - checks the voltage
  *
@@ -644,9 +635,6 @@ inline void task_initializing(void)
 #endif
 
     set_machine_initial_state();
-
-    
-    check_buffers();
 
     VERBOSE_MSG_INIT(usart_send_string("System initialized without errors.\n"));
     set_state_idle();
@@ -850,8 +838,8 @@ inline void machine_run(void)
     if(machine_clk){
         machine_clk = 0;
 
-        if(adc_data_ready){
-            adc_data_ready = 0;
+        if(adc.ready){
+            adc.ready = 0;
 
             read_and_check_adcs();
 

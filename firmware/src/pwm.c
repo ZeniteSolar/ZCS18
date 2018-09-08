@@ -98,7 +98,9 @@ void pwm_compute(void)
 
     control.D_step = PWM_D_STEP;
     control.D = CONVERTER_TEST_WITH_FIXED_DUTYCYCLE_DT_VALUE;
+    #ifdef ENABLE_SOFTWARE_BATTERY_VOLTAGE_LIMIT
     battery_voltage_limit();
+    #endif // ENABLE_SOFTWARE_BATTERY_VOLTAGE_LIMIT
 
 #else  // CONVERTER_TEST_WITH_FIXED_DUTYCYCLE
 

@@ -1,89 +1,16 @@
 #include "adc.h"
 
 /**
- * @brief initializes all adc circular buffers.
- */
-void init_buffers(void)
-{
-    CBUF_Init(cbuf_adc0);
-    CBUF_Init(cbuf_adc1);
-    CBUF_Init(cbuf_adc2);
-}
-
-/**
- * @brief computes the average of a given adc channel
- *
- * Ma = (1/N)*Summation of x[i] from i=0 to N, 
- * if N = 2^k, then Ma = (Summation of x[i] from i=0 to N) >> k
- *
- */
-#ifdef ADC_8BITS
-inline uint8_t calc_ma_adc0(void)
-#else
-inline uint16_t calc_ma_adc0(void)
-#endif
-{   
-    uint16_t sum = 0;
-    for(uint8_t i = cbuf_adc0_SIZE; i; i--){
-        sum += CBUF_Get(cbuf_adc0, i);
-    }
-    ma_adc0 = sum >> cbuf_adc0_SIZE_2;
-    return ma_adc0;
-}
-
-/**
-* @brief computes the average of a given adc channel
-*
-* Ma = (1/N)*Summation of x[i] from i=0 to N, 
-* if N = 2^k, then Ma = (Summation of x[i] from i=0 to N) >> k
-*
-*/
-#ifdef ADC_8BITS
-inline uint8_t calc_ma_adc1(void)
-#else
-inline uint16_t calc_ma_adc1(void)
-#endif
-{   
-    uint16_t sum = 0;
-    for(uint8_t i = cbuf_adc1_SIZE; i; i--){
-        sum += CBUF_Get(cbuf_adc1, i);
-    }
-    ma_adc1 = sum >> cbuf_adc1_SIZE_2;
-    return ma_adc1;
-}
-
-/**
-* @brief computes the average of a given adc channel 
-*
-* Ma = (1/N)*Summation of x[i] from i=0 to N, 
-* if N = 2^k, then Ma = (Summation of x[i] from i=0 to N) >> k
-*
-*/
-#ifdef ADC_8BITS
-inline uint8_t calc_ma_adc2(void)
-#else
-inline uint16_t calc_ma_adc2(void)
-#endif 
-{   
-    uint16_t sum = 0;
-    for(uint8_t i = cbuf_adc2_SIZE; i; i--){
-        sum += CBUF_Get(cbuf_adc2, i);
-    }
-    ma_adc2 = sum >> cbuf_adc2_SIZE_2;
-    return ma_adc2;
-}
-
-/**
  * @brief Changes ADC channel
  * @param __ch is the channel to be switched to
  * @return return the selected channel
  */
 inline uint8_t adc_select_channel(adc_channels_t __ch)
 {
-    if(__ch < ADC_LAST_CHANNEL ) ADC_CHANNEL = __ch;
+    if(__ch < ADC_LAST_CHANNEL ) adc.select = __ch;
 
-    ADMUX = (ADMUX & 0xF8) | ADC_CHANNEL; // clears the bottom 3 bits before ORing
-    return ADC_CHANNEL;
+    ADMUX = (ADMUX & 0xF8) | adc.select; // clears the bottom 3 bits before ORing
+    return adc.select;
 }
 
 /**
@@ -91,7 +18,9 @@ inline uint8_t adc_select_channel(adc_channels_t __ch)
  */
 void adc_init(void)
 {
-    adc_data_ready = 0;
+    adc.ready = 0;
+    adc.select = ADC0;
+
     clr_bit(PRR0, PRADC);                           // Activates clock to adc
 
     // configuracao do ADC
@@ -153,86 +82,47 @@ void adc_init(void)
 
     TIMSK0 |=   (1 << OCIE0A);                      // Ativa a interrupcao na igualdade de comparação do TC0 com OCR0A
 
-    init_buffers();
-
 }
-
-
-/**
- * @brief executes a simple average
- */
-inline void calc_avg(void)
-{
-    avg_adc0 = ma_adc0_sum / avg_sum_samples;
-    avg_adc1 = ma_adc1_sum / avg_sum_samples;
-    avg_adc2 = ma_adc2_sum / avg_sum_samples;
-    ma_adc0_sum = ma_adc1_sum = ma_adc2_sum = avg_sum_samples = 0;
-}
-
 
 /**
  * @brief MUX do ADC
  */
-ISR(ADC_vect){
-    switch(ADC_CHANNEL){
-        case ADC0:
-            VERBOSE_MSG_ADC(usart_send_string(" \tadc0: "));
+ISR(ADC_vect)
+{
+
 #ifdef FAKE_ADC_ON
-            CBUF_Push(cbuf_adc0, FAKE_ADC0_VALUE); 
+    adc.channel[adc.select].sum += FAKE_ADC;
 #else // FAKE_ADC_ON
-#ifdef ADC_8BITS
-            CBUF_Push(cbuf_adc0, ADCH); 
-#else // ADC_8BITS
-            CBUF_Push(cbuf_adc0, ADC); 
-#endif // ADC_8BITS
+    #ifdef ADC_8BITS
+    adc.channel[adc.select].sum += ADCH;
+    #else // ADC_8BITS
+    adc.channel[adc.select].sum += ADC;
+    #endif // ADC_8BITS
 #endif // FAKE_ADC_ON
-            calc_ma_adc0();
-            ma_adc0_sum += ma_adc0;
-            ADC_CHANNEL++;
-            break;
-        case ADC1:
-            VERBOSE_MSG_ADC(usart_send_string(" \tadc1: "));
-#ifdef FAKE_ADC_ON
-            CBUF_Push(cbuf_adc0, FAKE_ADC0_VALUE); 
-#else // FAKE_ADC_ON
-#ifdef ADC_8BITS
-            CBUF_Push(cbuf_adc1, ADCH); 
-#else // ADC_8BITS     
-            CBUF_Push(cbuf_adc1, ADC); 
-#endif // ADC_8BITS 
-#endif // FAKE_ADC_ON
-            calc_ma_adc1();
-            ma_adc1_sum += ma_adc1;
-            ADC_CHANNEL++;
-            break;
-        case ADC2:
-            VERBOSE_MSG_ADC(usart_send_string(" \tadc2: "));
-#ifdef FAKE_ADC_ON
-            CBUF_Push(cbuf_adc0, FAKE_ADC0_VALUE); 
-#else // FAKE_ADC_ON
-#ifdef ADC_8BITS
-            CBUF_Push(cbuf_adc2, ADCH);
-#else // ADC_8BITS 
-            CBUF_Push(cbuf_adc2, ADC);
-#endif // ADC_8BITS 
-#endif // FAKE_ADC_ON
-            calc_ma_adc2();
-            ma_adc2_sum += ma_adc2;
-			ADC_CHANNEL++;
-            //break;
-        default:
-            avg_sum_samples++;
-            adc_data_ready = 1;
-            ADC_CHANNEL = ADC0;             // recycles
-            VERBOSE_MSG_ADC(usart_send_string("\n"));
-            break;
-    }        
-#ifdef ADC_8BITS
-    VERBOSE_MSG_ADC(usart_send_uint8(ADCH));
-#else
-    VERBOSE_MSG_ADC(usart_send_uint16(ADC));
-#endif
-    adc_select_channel(ADC_CHANNEL);
+
+    if(++adc.select > ADC_LAST_CHANNEL){
+        adc.select = ADC0;             // recycles
+        
+        if(++adc.samples >= ADC_AVG_SIZE_10){
+            adc.channel[0].avg = adc.channel[0].sum >> ADC_AVG_SIZE_2;
+            adc.channel[1].avg = adc.channel[1].sum >> ADC_AVG_SIZE_2;
+            adc.channel[2].avg = adc.channel[2].sum >> ADC_AVG_SIZE_2;
+
+            adc.samples = adc.channel[0].sum = adc.channel[1].sum = adc.channel[2].sum = 0;
+            adc.ready = 1;
+            
+            VERBOSE_MSG_ADC( usart_send_string("adc:") );
+            VERBOSE_MSG_ADC( usart_send_uint16(adc.channel[0].avg) );
+            VERBOSE_MSG_ADC( usart_send_char(',') );
+            VERBOSE_MSG_ADC( usart_send_uint16(adc.channel[1].avg) );
+            VERBOSE_MSG_ADC( usart_send_char(',') );
+            VERBOSE_MSG_ADC( usart_send_uint16(adc.channel[2].avg) );
+            VERBOSE_MSG_ADC( usart_send_char('\n') );
+        }
+    }
+
+    adc_select_channel(adc.select);
+                           
 }
  
 /**

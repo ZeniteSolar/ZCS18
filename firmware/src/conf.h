@@ -41,8 +41,8 @@
 // PWM DEFINITIONS
 #ifdef PWM_ON
 // WARNING: DEFINITIONS FOR TEST THE CONVERTER WITH FIXED DUTY CYCLE!!!
-//#define CONVERTER_TEST_WITH_FIXED_DUTYCYCLE
-//#define CONVERTER_TEST_WITH_FIXED_DUTYCYCLE_DT_VALUE 0.60*(PWM_TOP)
+#define CONVERTER_TEST_WITH_FIXED_DUTYCYCLE
+#define CONVERTER_TEST_WITH_FIXED_DUTYCYCLE_DT_VALUE 0.60*(PWM_TOP)
 //#define PWM_TEST 
 //#define PEO_TEST
 
@@ -58,35 +58,34 @@
 
 #ifdef ADC_ON
 // ADC CONFIGURATION
-#define ADC_FREQUENCY                       20000
-#define ADC_TIMER_PRESCALER                 64
-#define ADC_PANEL_VOLTAGE                   adc0
-#define ADC_PANEL_CURRENT                   adc1
-#define ADC_BATTERY_VOLTAGE                 adc2
-#define AVG_PANEL_VOLTAGE                   avg_adc0
-#define AVG_PANEL_CURRENT                   avg_adc1
-#define AVG_BATTERY_VOLTAGE                 avg_adc2
+// note that changing ADC_FREQUENCY may cause problems with avg_sum_samples
+#define ADC_FREQUENCY                       10000 // 20000
+#define ADC_TIMER_PRESCALER                 8
+#define AVG_PANEL_VOLTAGE                   adc.channel[ADC0].avg
+#define AVG_PANEL_CURRENT                   adc.channel[ADC1].avg
+#define AVG_BATTERY_VOLTAGE                 adc.channel[ADC2].avg
 #define ADC_NOISE_VALUE                     10
-#define ADC_PANEL_VOLTAGE_ANGULAR_COEF      49279 //(40000/((4/5)*1024))
+#define ADC_PANEL_VOLTAGE_ANGULAR_COEF      10000//49776 //(40000/((4/5)*1024))
 //#define ADC_PANEL_VOLTAGE_LINEAR_COEF       0
-#define ADC_PANEL_CURRENT_ANGULAR_COEF      16985 //(16000/(((16*200*1500e-6)/5)*1024))
+#define ADC_PANEL_CURRENT_ANGULAR_COEF      10000//16985 //(16000/(((16*200*1500e-6)/5)*1024))
 //#define ADC_PANEL_CURRENT_LINEAR_COEF       0
-#define ADC_BATTERY_VOLTAGE_ANGULAR_COEF    64962 //~(60000/1024)
+#define ADC_BATTERY_VOLTAGE_ANGULAR_COEF    10000//65991 //~(60000/1024)
 //#define ADC_BATTERY_VOLTAGE_LINEAR_COEF     0
+#define ADC_AVG_SIZE_2                      10                  // in base 2
+#define ADC_AVG_SIZE_10                     1024                // in base 10
 
-#define FAKE_ADC_ON
+//#define FAKE_ADC_ON
 #ifdef FAKE_ADC_ON
-#define FAKE_ADC0_VALUE                     100
-#define FAKE_ADC1_VALUE                     100
-#define FAKE_ADC2_VALUE                     200
+#define FAKE_ADC                            1021
 #endif // FAKE_ADC_ON
 
 #endif //ADC_ON
 
 #ifdef MACHINE_ON
-#define MACHINE_TIMER_FREQUENCY             120     //<! machine timer frequency in Hz
-#define MACHINE_TIMER_PRESCALER             1024    //<! machine timer prescaler
-#define MACHINE_CLK_DIVIDER_VALUE           4       //<! machine_run clock divider
+// The machine frequency may not be superior of ADC_FREQUENCY/ADC_AVG_SIZE_10
+#define MACHINE_TIMER_FREQUENCY             120           //<! machine timer frequency in Hz
+#define MACHINE_TIMER_PRESCALER             1024          //<! machine timer prescaler
+#define MACHINE_CLK_DIVIDER_VALUE           ((uint64_t)(uint32_t)MACHINE_TIMER_FREQUENCY*(uint32_t)ADC_AVG_SIZE_10)/(ADC_FREQUENCY)           //<! machine_run clock divider
 #define MACHINE_FREQUENCY                   (MACHINE_TIMER_FREQUENCY)/(MACHINE_CLK_DIVIDER_VALUE)
 
 // MPPT ALGORITHMS
@@ -103,7 +102,7 @@
 
 // SAFETY ALGORITHMS
 //#define ENABLE_PANEL_POWER_LIMIT
-#define ENABLE_SOFTWARE_BATTERY_VOLTAGE_LIMIT
+//#define ENABLE_SOFTWARE_BATTERY_VOLTAGE_LIMIT
 
 // NAIVE IO AND PO COMPUTATION BASED ON D and PANEL CURRENT
 #define ENABLE_IO_COMPUTATION
@@ -171,7 +170,7 @@
 #define RUNNING_BATTERY_POWER_MAX    		1.15*(PANEL_STC_MPP_POWER)
 #define RUNNING_BATTERY_POWER_MIN    		(ADC_NOISE_VALUE)*(ADC_NOISE_VALUE)*(ADC_PANEL_VOLTAGE_ANGULAR_COEF >> 10)*(ADC_PANEL_CURRENT_ANGULAR_COEF >> 10) 
 
-#define ENABLE_HARDWARE_OVERVOLTAGE_INTERRUPT
+//#define ENABLE_HARDWARE_OVERVOLTAGE_INTERRUPT
 #define ENABLE_HARDWARE_ENABLE_SWITCH_INTERRUPT
 
 //#define CHECK_INITIALIZING_CONDITIONS
