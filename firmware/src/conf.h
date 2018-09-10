@@ -41,8 +41,8 @@
 // PWM DEFINITIONS
 #ifdef PWM_ON
 // WARNING: DEFINITIONS FOR TEST THE CONVERTER WITH FIXED DUTY CYCLE!!!
-#define CONVERTER_TEST_WITH_FIXED_DUTYCYCLE
-#define CONVERTER_TEST_WITH_FIXED_DUTYCYCLE_DT_VALUE 0.60*(PWM_TOP)
+//#define CONVERTER_TEST_WITH_FIXED_DUTYCYCLE
+//#define CONVERTER_TEST_WITH_FIXED_DUTYCYCLE_DT_VALUE 0.60*(PWM_TOP)
 //#define PWM_TEST 
 //#define PEO_TEST
 
@@ -65,18 +65,18 @@
 #define AVG_PANEL_CURRENT                   adc.channel[ADC1].avg
 #define AVG_BATTERY_VOLTAGE                 adc.channel[ADC2].avg
 #define ADC_NOISE_VALUE                     10
-#define ADC_PANEL_VOLTAGE_ANGULAR_COEF      10000//49776 //(40000/((4/5)*1024))
+#define ADC_PANEL_VOLTAGE_ANGULAR_COEF      54937 //49776 //(40000/((4/5)*1024))
 //#define ADC_PANEL_VOLTAGE_LINEAR_COEF       0
-#define ADC_PANEL_CURRENT_ANGULAR_COEF      10000//16985 //(16000/(((16*200*1500e-6)/5)*1024))
+#define ADC_PANEL_CURRENT_ANGULAR_COEF      16337 //16985 //(16000/(((16*200*1500e-6)/5)*1024))
 //#define ADC_PANEL_CURRENT_LINEAR_COEF       0
-#define ADC_BATTERY_VOLTAGE_ANGULAR_COEF    10000//65991 //~(60000/1024)
+#define ADC_BATTERY_VOLTAGE_ANGULAR_COEF    65088 //65991 //~(60000/1024)
 //#define ADC_BATTERY_VOLTAGE_LINEAR_COEF     0
-#define ADC_AVG_SIZE_2                      10                  // in base 2
-#define ADC_AVG_SIZE_10                     1024                // in base 10
+#define ADC_AVG_SIZE_2                      7                  // in base 2
+#define ADC_AVG_SIZE_10                     128                // in base 10
 
 //#define FAKE_ADC_ON
 #ifdef FAKE_ADC_ON
-#define FAKE_ADC                            1021
+#define FAKE_ADC                            1
 #endif // FAKE_ADC_ON
 
 #endif //ADC_ON
@@ -87,6 +87,13 @@
 #define MACHINE_TIMER_PRESCALER             1024          //<! machine timer prescaler
 #define MACHINE_CLK_DIVIDER_VALUE           ((uint64_t)(uint32_t)MACHINE_TIMER_FREQUENCY*(uint32_t)ADC_AVG_SIZE_10)/(ADC_FREQUENCY)           //<! machine_run clock divider
 #define MACHINE_FREQUENCY                   (MACHINE_TIMER_FREQUENCY)/(MACHINE_CLK_DIVIDER_VALUE)
+
+#define XSTR(x) STR(x)
+#define STR(x) #x
+
+#pragma message "ADC_FREQUENCY: " XSTR(ADC_FREQUENCY)
+#pragma message "ADC_AVG_SIZE_10: " XSTR(ADC_AVG_SIZE_10)
+#pragma message "MACHINE_FREQUENCY: " XSTR(MACHINE_FREQUENCY)
 
 // MPPT ALGORITHMS
 #define ENABLE_SWEEP

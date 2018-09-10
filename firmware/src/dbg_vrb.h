@@ -63,4 +63,11 @@
 #define DEBUG1
 #endif
 
+// https://stackoverflow.com/a/10791845/3850957
+//usage:
+//#pragma message "The value of ABC: " XSTR(ABC)
+#define XSTR(x) STR(x)
+#define STR(x) #x
+
+
 #endif /* ifndef DBG_VRB_H */
